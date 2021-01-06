@@ -1,0 +1,41 @@
+* {
+    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',monospace;
+}
+
+body {
+    background-color: rgba(0, 0, 155, 0.7);
+    color: white;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 2em;
+    width: fit-content;
+    text-align: center;
+}
+
+button {
+    background-color: white;
+    color: rgba(0, 0, 155, 0.7);
+    font-size: large;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+@keyframes spin { 100% { -webkit-transform: rotate(360deg); transform:rotate(360deg); }}
+
+#gear {
+    width: 6em;
+    height: 6em;
+    padding: 1em;
+    animation: spin 6s linear infinite;
+}
+
+#connection_div{
+    display: none;
+}
+
+#connection_input{
+    background-color: white;
+    min-width: 12em;
+    color: black;
+    margin-bottom: 0.5em;
+}

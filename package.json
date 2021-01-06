@@ -1,0 +1,19 @@
+{
+  "name": "crackR",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "crypto-js": "^4.0.0",
+    "electron": "^11.1.1",
+    "express": "^4.17.1",
+    "socket.io": "^3.0.5",
+    "socket.io-client": "^3.0.5"
+  }
+}

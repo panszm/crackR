@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<hmtl lang="en">
+
+<head>
+    <title>crackR - Results</title>
+    <style>
+        * {font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',monospace;}
+        body {background-color: rgba(0, 0, 155, 0.7);color: white; overflow-y: scroll;width:fit-content;margin:auto}
+        table {outline-width: 2px;outline-color: white;}
+        td {min-width: 10vh;}
+        tr:nth-child(even) {background-color: rgb(67, 21, 126);}
+        tr:nth-child(odd) {background-color: rgb(97, 51, 156);}
+    </style>>
+</head>
+
+<body>
+    Table with current results:
+    <table id="data_table">
+
+    </table>
+    <script>
+        function loadFile(filePath) {
+            var result = null;
+            var xmlhttp = new XMLHttpRequest();
+            xmlhttp.open("GET", filePath, false);
+            xmlhttp.send();
+            if (xmlhttp.status==200) {
+                result = xmlhttp.responseText;
+            }
+            return result;
+        }
+        let data = loadFile("/data.csv").split('\n')
+        let table = document.querySelector("#data_table");
+        let i = 0;
+        let row = document.createElement("tr");
+        let td1 = document.createElement("th");
+        let td2 = document.createElement("th");
+        row.appendChild(td1);
+        row.appendChild(td2);
+        td1.textContent = "Cell index";
+        td2.textContent = "Result";
+        table.appendChild(row);
+        for(line of data){
+            let row = document.createElement("tr");
+            let td1 = document.createElement("td");
+            let td2 = document.createElement("td");
+            td1.textContent = i;
+            if(line==0){
+                td2.textContent = "NotFound"
+            }else{
+                td2.textContent = line;
+            }
+            row.appendChild(td1);
+            row.appendChild(td2);
+            table.appendChild(row);
+
+            i=i+1;
+        }
+    </script>
+</body>
+
+</hmtl>

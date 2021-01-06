@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<hmtl lang="en">
+
+<head>
+    <title>crackR</title>
+    <link rel="stylesheet" href="common.css"/>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/aes.js"></script>
+    <script src="calculator.js"></script>
+</head>
+
+<body>
+    <button id="button_calc_start" onclick="started_calc()">START CALCULATIONS</button>
+    <button id="button_calc_stop" style="display: none"  onclick="stopped_calc()">STOP CALCULATIONS</button>
+    <div id="progress"></div>
+    <div id="connection_div">
+        <img src="gear.png" id="gear"/>
+        <div id="connection_input" contenteditable="true">INSERT IP-Address</div>
+        <button id="button_connect">CONNECT</button>
+    </div>
+    </br>
+    <div id="net">
+        Currently connected to:
+        <div id ="to_other">None</div>
+        Currently connected to me:
+        <div id ="to_me">None</div>        
+    </div>
+</body>
+
+<script>
+    reloadProgress();
+</script>
+</hmtl>
