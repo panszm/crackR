@@ -50,6 +50,9 @@ peer.on('open', function(id) {
 
   peer.on('connection', function(conn) {
         to_me.push(conn);
+        conn.on('close', function() { 
+            to_me = to_me.filter(item => item !== conn)
+         });
         console.log('Hello!',to_me.length)
     });
 
@@ -71,6 +74,9 @@ function connect(){
         // Send messages
         conn.send('Hello!');
       });
+    conn.on('close', function() {
+        to_other = null;
+    });  
     to_other = conn;
 }
 
@@ -78,6 +84,10 @@ function disconnect(){
     document.querySelector("#button_connect").style.display = "block";
     document.querySelector("#connection_input").style.display = "block";
     document.querySelector("#button_disconnect").style.display = "none";
+    to_other.close();
+    for(item of to_me){
+        item.close();
+    }
 }
 
 function getNextCell(){
@@ -119,6 +129,14 @@ function checkHash(number){
 
 function solutionFound(x){
     console.log("Found Solution!: "+x);
+}
+
+function refreshNet(){
+    if( to_other != null){document.querySelector("#to_other").textContent = to_other.peer}
+    let conn_content = "";
+    for(conn of to_me){
+        conn_content += conn.peer+"\n";
+    }
 }
 
 ////////Start/Stop
