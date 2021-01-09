@@ -61,7 +61,7 @@ function connect(){
     document.querySelector("#button_connect").style.display = "none";
     document.querySelector("#connection_input").style.display = "none";
     document.querySelector("#button_disconnect").style.display = "block";
-    var conn = peer.connect('dest-peer-id');
+    var conn = peer.connect(document.querySelector("#connection_input").textContent);
     conn.on('open', function() {
         // Receive messages
         conn.on('data', function(data) {
