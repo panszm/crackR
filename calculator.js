@@ -1,5 +1,3 @@
-const e = require("express");
-
 function loadFile(filePath) {
     var result = null;
     var xmlhttp = new XMLHttpRequest();
@@ -53,7 +51,8 @@ peer.on('open', function(id) {
   peer.on('connection', function(conn) {
         to_me.push(conn);
         conn.on('close', function() { 
-            to_me = to_me.filter(item => item !== conn)
+            to_me = to_me.filter(item => item !== conn);
+            refreshNet();
          });
         refreshNet();
     });
@@ -76,6 +75,7 @@ function connect(){
       });
     conn.on('close', function() {
         to_other = null;
+        refreshNet()
     });  
     to_other = conn;
 }
