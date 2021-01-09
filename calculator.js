@@ -1,5 +1,3 @@
-const e = require("express");
-
 function loadFile(filePath) {
     var result = null;
     var xmlhttp = new XMLHttpRequest();
