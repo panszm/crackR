@@ -67,15 +67,15 @@ function connect(){
     document.querySelector("#button_disconnect").style.display = "block";
     var conn = peer.connect(document.querySelector("#connection_input").textContent);
     conn.on('open', function() {
+        refreshNet();
         // Receive messages
         conn.on('data', function(data) {
           console.log('Received', data);
         });
-        refreshNet();
       });
     conn.on('close', function() {
         to_other = null;
-        refreshNet()
+        refreshNet();
     });  
     to_other = conn;
 }
@@ -137,7 +137,7 @@ function refreshNet(){
     for(conn of to_me){
         conn_content += conn.peer+"\n";
     }
-    document.querySelector("#to_other").textContent = conn_content;
+    document.querySelector("#to_me").textContent = conn_content;
 }
 
 ////////Start/Stop
