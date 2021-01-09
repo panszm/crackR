@@ -53,7 +53,7 @@ peer.on('open', function(id) {
         conn.on('close', function() { 
             to_me = to_me.filter(item => item !== conn)
          });
-        console.log('Hello!',to_me.length)
+        refreshNet();
     });
 
 function executeAsync(func) {
@@ -70,9 +70,7 @@ function connect(){
         conn.on('data', function(data) {
           console.log('Received', data);
         });
-      
-        // Send messages
-        conn.send('Hello!');
+        refreshNet();
       });
     conn.on('close', function() {
         to_other = null;
