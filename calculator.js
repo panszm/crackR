@@ -48,17 +48,35 @@ peer.on('open', function(id) {
     document.querySelector("#my_id").textContent = "My_id: "+id
   });
 
+  peer.on('connection', function(conn) {
+        to_me.push(conn);
+        console.log('Hello!',to_me.length)
+    });
+
 function executeAsync(func) {
     setTimeout(func, 0);
 }
 
 function connect(){
     document.querySelector("#button_connect").style.display = "none";
+    document.querySelector("#connection_input").style.display = "none";
     document.querySelector("#button_disconnect").style.display = "block";
+    var conn = peer.connect('dest-peer-id');
+    conn.on('open', function() {
+        // Receive messages
+        conn.on('data', function(data) {
+          console.log('Received', data);
+        });
+      
+        // Send messages
+        conn.send('Hello!');
+      });
+    to_other = conn;
 }
 
 function disconnect(){
     document.querySelector("#button_connect").style.display = "block";
+    document.querySelector("#connection_input").style.display = "block";
     document.querySelector("#button_disconnect").style.display = "none";
 }
 
