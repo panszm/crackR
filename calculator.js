@@ -1,3 +1,5 @@
+const e = require("express");
+
 function loadFile(filePath) {
     var result = null;
     var xmlhttp = new XMLHttpRequest();
@@ -135,6 +137,7 @@ function refreshNet(){
     for(conn of to_me){
         conn_content += conn.peer+"\n";
     }
+    document.querySelector("#to_other").textContent = conn_content;
 }
 
 ////////Start/Stop
