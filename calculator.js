@@ -39,13 +39,27 @@ let FOUND = false;
 let current_cell = 0;
 let current_iter = 0;
 
-let to_other = none;
+let to_other;
 let to_me = []
 
+var peer = new Peer();
 
+peer.on('open', function(id) {
+    document.querySelector("#my_id").textContent = "My_id: "+id
+  });
 
 function executeAsync(func) {
     setTimeout(func, 0);
+}
+
+function connect(){
+    document.querySelector("#button_connect").style.display = "none";
+    document.querySelector("#button_disconnect").style.display = "block";
+}
+
+function disconnect(){
+    document.querySelector("#button_connect").style.display = "block";
+    document.querySelector("#button_disconnect").style.display = "none";
 }
 
 function getNextCell(){

@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="common.css"/>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/aes.js"></script>
+    <script src="https://unpkg.com/peerjs@1.3.1/dist/peerjs.min.js"></script>
     <script src="calculator.js"></script>
 </head>
 
@@ -14,17 +15,19 @@
     <button id="button_calc_stop" style="display: none"  onclick="stopped_calc()">STOP CALCULATIONS</button>
     <div id="progress"></div>
     <div id="connection_div">
+        <div id="my_id"></div>
         <img src="gear.png" id="gear"/>
-        <div id="connection_input" contenteditable="true">INSERT IP-Address</div>
-        <button id="button_connect">CONNECT</button>
+        <div id="connection_input" contenteditable="true">INSERT ID</div>
+        <button id="button_connect" onClick="connect()">CONNECT</button>
+        <button id="button_disconnect" style="display: none" onClick="disconnect()">DISCONNECT</button>
+        <div id="net">
+            Currently connected to:
+            <div id ="to_other">None</div>
+            Currently connected to me:
+            <div id ="to_me">None</div>        
+        </div>
     </div>
     </br>
-    <div id="net">
-        Currently connected to:
-        <div id ="to_other">None</div>
-        Currently connected to me:
-        <div id ="to_me">None</div>        
-    </div>
 </body>
 
 <script>
