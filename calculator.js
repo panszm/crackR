@@ -1,3 +1,7 @@
+function executeAsync(func) {
+    setTimeout(func, 0);
+}
+
 function loadFile(filePath) {
     var result = null;
     var xmlhttp = new XMLHttpRequest();
@@ -9,9 +13,22 @@ function loadFile(filePath) {
     return result;
 }
 
+function postReq(filePath) {
+    var result = null;
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.open("POST", filePath, false);
+    xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xmlhttp.send();
+    if (xmlhttp.status==200) {
+        result = xmlhttp.responseText;
+    }       
+    return result;
+}
+
 function reloadProgress(){
     const csv = loadFile('./results/data.csv').split('\n');
     let i = 0;
+    let index = 0;
     let completed = false;
     for(line of csv){
         line = line.trim()
@@ -19,9 +36,12 @@ function reloadProgress(){
             completed = true;
             i = line
             break;
-        }else if(line==0){
+        }else if(line==-1){
             i=i+1;
+        }else if (line==-2 || line==-3){
+            postReq("http://localhost/modifyrow.php?index="+index+"&val=0")
         }
+        index++;
     }
     if(completed){
         document.querySelector('#progress').textContent = "Current Progress: SOLUTION FOUND -> "+i;
@@ -29,6 +49,7 @@ function reloadProgress(){
     }else{
         document.querySelector('#progress').textContent = "Current Progress: SOLUTION NOT FOUND, "+i+" * 2^24 combinations checked so far";
     }
+    console.log(getNextCell())
 }
 
 //////Wheeling logic
@@ -56,10 +77,6 @@ peer.on('open', function(id) {
          });
         refreshNet();
     });
-
-function executeAsync(func) {
-    setTimeout(func, 0);
-}
 
 function connect(){
     document.querySelector("#button_connect").style.display = "none";
@@ -93,20 +110,27 @@ function disconnect(){
 function getNextCell(){
     const csv = loadFile('./results/data.csv').split('\n');
     let i = 0;
+    let index = 0;
     let completed = false;
     for(line of csv){
         line = line.trim()
         if (line>0 && line!=""){
             completed = true;
-            i = line
+            i = line;
             break;
-        }else{
+        }else if(line==-1 && i>=0){
             i=i+1;
+        }else if(i>=0){
+            i = -index-1;
         }
+        index+=1;
     }
     if(completed){
         FOUND = true;
     }else{
+        if(i<0){
+            return -i-1;
+        }
         return i;
     }
 }
@@ -132,7 +156,7 @@ function solutionFound(x){
 }
 
 function refreshNet(){
-    if( to_other != null){document.querySelector("#to_other").textContent = to_other.peer}
+    if( to_other != null){document.querySelector("#to_other").textContent = to_other.peer;}else{document.querySelector("#to_other").textContent = "";}
     let conn_content = "";
     for(conn of to_me){
         conn_content += conn.peer+"\n";
