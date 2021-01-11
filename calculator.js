@@ -229,7 +229,7 @@ function getMetaData(){
         line = line.trim()
         if (line>0 && line!=""){
             solved = line;
-        }else{
+        }else if(line!=-1){
             unchecked.push(index);
         }
         index++;
@@ -253,7 +253,7 @@ function getMetaResponse(){
         line = line.trim()
         if (line>0 && line!=""){
             solved = line;
-        }else{
+        }else if(line!=-1){
             unchecked.push(index);
         }
         index++;
