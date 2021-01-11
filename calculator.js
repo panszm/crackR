@@ -212,7 +212,7 @@ function processMetaData(data){
         setVal(0,data.solved);
     }else{
         for(let i = 0;i<=data.empty_offset;i++){
-            if(!(i in data.unchecked)){
+            if(data.unchecked.includes(i)){
                 console.log(i)
                 setVal(i,-1)
             }
