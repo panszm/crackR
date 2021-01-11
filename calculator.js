@@ -253,7 +253,7 @@ function getMetaResponse(){
         line = line.trim()
         if (line>0 && line!=""){
             solved = line;
-        }else if (line==-2 || line==-3 || line==""){
+        }else if (line==-2 || line==-3 || line=="" || line == 0){
             unchecked.push(index);
         }
         index++;
