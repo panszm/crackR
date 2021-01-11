@@ -1,3 +1,5 @@
+const { response } = require("express");
+
 function executeAsync(func) {
     setTimeout(func, 0);
 }
@@ -27,6 +29,11 @@ function postReq(filePath) {
 
 function setVal(row,val){
     postReq("http://localhost/modifyrow.php?index="+row+"&val="+val)
+}
+
+function getVal(row){
+    const csv = loadFile('./results/data.csv').split('\n');
+    return csv[row].trim();
 }
 
 function reloadProgress(){
@@ -59,6 +66,7 @@ function reloadProgress(){
 
 const CELL_SIZE = 2**24;
 const SOLUTION = "7fc56270e7a70fa81a5935b72eacbe29"
+let my_id = ""
 let FOUND = false;
 let current_cell = 0;
 let current_iter = 0;
@@ -69,6 +77,7 @@ let to_me = []
 var peer = new Peer();
 
 peer.on('open', function(id) {
+    my_id = id;
     document.querySelector("#my_id").textContent = "My_id: "+id
   });
 
@@ -83,15 +92,23 @@ peer.on('open', function(id) {
             console.log('Received', data);
             message = JSON.parse(data);
             switch(message.name){
-                    case "meta":
-                        conn.send(getMetaResponse());
-                        processMetaData(message);
-                        break;
-                    case "metar":
-                        processMetaData(message);
-                        break;
+                  case "meta":
+                      conn.send(getMetaResponse());
+                      if(to_other!=null){
+                          to_other.send(JSON.stringify(message))
+                      }
+                      for(element of to_me){
+                          if(element!=conn){
+                              element.send(JSON.stringify(message))
+                          }
+                      }
+                      processMetaData(message);
+                      break;
+                  case "metar":
+                      processMetaData(message);
+                      break;
             }
-        });
+          });
             conn.send(getMetaData());
     });
 
@@ -107,11 +124,48 @@ function connect(){
           message = JSON.parse(data);
           switch(message.name){
                 case "meta":
-                    conn.send(getMetaResponse());
-                    processMetaData(message);
+                    if(data.id != my_id){
+                        conn.send(getMetaResponse());
+                        if(to_other!=null){
+                            to_other.send(JSON.stringify(message))
+                        }
+                        for(element of to_me){
+                            if(element!=conn){
+                                element.send(JSON.stringify(message))
+                            }
+                        }
+                        processMetaData(message);
+                    }
                     break;
                 case "metar":
                     processMetaData(message);
+                    break;
+                case "ask":
+                    if(getVal(message.index)!=-2 && getVal(message.index)!=-1 && (getVal(message.index)<=0 || getVal(message.index)=="")){
+                        setVal(message.index,-2)
+                        response = {
+                            name: "askr",
+                            index: message.index,
+                            permission: true
+                        }
+                        conn.send(JSON.stringify(response))
+                    }else{
+                        response = {
+                            name: "askr",
+                            index: message.index,
+                            permission: false
+                        }
+                        conn.send(JSON.stringify(response))
+                    }
+                    break;
+                case "askr":
+                    if(message.permission){
+                        current_cell=message.index;
+                        executeAsync(goOverCell());
+                    }else{
+                        setVal(message.index,-2);
+                        askPermission(getNextCell());
+                    }
                     break;
           }
         });
@@ -163,6 +217,33 @@ function getNextCell(){
     }
 }
 
+function askPermission(index){
+    if(to_other!=null){
+        askPermissionSingle(to_other,index);
+    }
+    for(conn of to_me){
+        askPermissionSingle(index);
+    }
+}
+
+function askPermissionSingle(conn,index){
+    result = {
+        name: "ask",
+        index: index
+    }
+    conn.send(JSON.stringify(result.name));
+}
+
+function update(){
+    let data = getMetaData();
+    if(to_other!=null){
+        to_other.send(data);
+    }
+    for(pee of to_me){
+        pee.send(data);
+    }
+}
+
 function goOverCell(){
     while(current_iter<CELL_SIZE && !FOUND){
         checkHash(BigInt(current_cell*CELL_SIZE+current_iter))
@@ -171,7 +252,9 @@ function goOverCell(){
     if(!FOUND){
         setVal(current_cell,-1);
         current_iter = 0;
+        askPermission(getNextCell());
     }
+    update();
 }
 
 function checkHash(number){
@@ -235,6 +318,7 @@ function getMetaData(){
         index++;
     }
     result = {
+        id: my_id,
         name: "meta",
         solved: solved,
         empty_offset: empty_offset,
@@ -259,6 +343,7 @@ function getMetaResponse(){
         index++;
     }
     result = {
+        id: my_id,
         name: "metar",
         solved: solved,
         empty_offset: empty_offset,
@@ -273,6 +358,8 @@ function started_calc(){
     document.querySelector("#button_calc_stop").style.display = "block";
     document.querySelector('#progress').style.display = "none";
     document.querySelector('#connection_div').style.display = "block";
+
+    askPermission(getNextCell())
 }
 function stopped_calc(){
     document.querySelector("#button_calc_start").style.display = "block";
