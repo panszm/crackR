@@ -77,6 +77,20 @@ peer.on('open', function(id) {
         conn.on('close', function() { 
             to_me = to_me.filter(item => item !== conn);
             refreshNet();
+            conn.on('data', function(data) {
+                console.log('Received', data);
+                message = JSON.parse(data);
+                switch(message.name){
+                        case "meta":
+                            conn.send(getMetaResponse());
+                            processMetaData(message);
+                            break;
+                        case "metar":
+                            processMetaData(message);
+                            break;
+                }
+            });
+                conn.send(getMetaData());
          });
         refreshNet();
     });
@@ -101,7 +115,6 @@ function connect(){
                     break;
           }
         });
-
         conn.send(getMetaData());
       });
     conn.on('close', function() {
@@ -209,7 +222,7 @@ function processMetaData(data){
 function getMetaData(){
     const csv = loadFile('./results/data.csv').split('\n');
     let solved = ""
-    let empty_offset = csv.length()-1;
+    let empty_offset = csv.length-1;
     let unchecked = [];
     let index = 0;
     for(line of csv){
@@ -233,7 +246,7 @@ function getMetaData(){
 function getMetaResponse(){
     const csv = loadFile('./results/data.csv').split('\n');
     let solved = ""
-    let empty_offset = csv.length()-1;
+    let empty_offset = csv.length-1;
     let unchecked = [];
     let index = 0;
     for(line of csv){
