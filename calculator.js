@@ -25,6 +25,10 @@ function postReq(filePath) {
     return result;
 }
 
+function setVal(row,val){
+    postReq("http://localhost/modifyrow.php?index="+row+"&val="+val)
+}
+
 function reloadProgress(){
     const csv = loadFile('./results/data.csv').split('\n');
     let i = 0;
@@ -49,7 +53,6 @@ function reloadProgress(){
     }else{
         document.querySelector('#progress').textContent = "Current Progress: SOLUTION NOT FOUND, "+i+" * 2^24 combinations checked so far";
     }
-    console.log(getNextCell())
 }
 
 //////Wheeling logic
@@ -85,15 +88,27 @@ function connect(){
     var conn = peer.connect(document.querySelector("#connection_input").textContent);
     conn.on('open', function() {
         refreshNet();
-        // Receive messages
         conn.on('data', function(data) {
           console.log('Received', data);
+          message = JSON.parse(data);
+          switch(message.name){
+                case "meta":
+                    conn.send(getMetaResponse());
+                    processMetaData(message);
+                    break;
+                case "metar":
+                    processMetaData(message);
+                    break;
+          }
         });
+
+        conn.send(getMetaData());
       });
     conn.on('close', function() {
         to_other = null;
         refreshNet();
     });  
+
     to_other = conn;
 }
 
@@ -135,24 +150,38 @@ function getNextCell(){
     }
 }
 
+function goOverCell(){
+    while(current_iter<CELL_SIZE && !FOUND){
+        checkHash(BigInt(current_cell*CELL_SIZE+current_iter))
+        current_iter+=1;
+    }
+    if(!FOUND){
+        setVal(current_cell,-1);
+        current_iter = 0;
+    }
+}
+
 function checkHash(number){
     key = ""
     while(number>0){
-        rest = number%256
+        rest = number%BigInt(256)
         number-=rest
-        number = number/256
-        key += String.fromCharCode(rest)
-        if(SOLUTION==CryptoJS.MD5(key)){
-            solutionFound(key);
-            FOUND = true
-            return;
-        } 
+        number = number/BigInt(256)
+        key += String.fromCharCode(Number(rest))
     }
-    console.log(key);
+    if(SOLUTION==CryptoJS.MD5(key)){
+        solutionFound(key);
+        FOUND = true
+        return;
+    } 
 }
 
 function solutionFound(x){
     console.log("Found Solution!: "+x);
+    setVal(current_cell,""+BigInt(current_cell*CELL_SIZE+current_iter));
+    disconnect();
+    stopped_calc();
+    reloadProgress();
 }
 
 function refreshNet(){
@@ -164,12 +193,75 @@ function refreshNet(){
     document.querySelector("#to_me").textContent = conn_content;
 }
 
+function processMetaData(data){
+    if(data.solved!=""){
+        FOUND = true;
+        setVal(0,data.solved);
+    }else{
+        for(let i = 0;i<=empty_offset;i++){
+            if(!(i in unchecked)){
+                setVal(i,-1)
+            }
+        }
+    }
+}
+
+function getMetaData(){
+    const csv = loadFile('./results/data.csv').split('\n');
+    let solved = ""
+    let empty_offset = csv.length()-1;
+    let unchecked = [];
+    let index = 0;
+    for(line of csv){
+        line = line.trim()
+        if (line>0 && line!=""){
+            solved = line;
+        }else if (line==-2 || line==-3 || line==""){
+            unchecked.push(index);
+        }
+        index++;
+    }
+    result = {
+        name: "meta",
+        solved: solved,
+        empty_offset: empty_offset,
+        unchecked: unchecked
+    }
+    return JSON.stringify(result);
+}
+
+function getMetaResponse(){
+    const csv = loadFile('./results/data.csv').split('\n');
+    let solved = ""
+    let empty_offset = csv.length()-1;
+    let unchecked = [];
+    let index = 0;
+    for(line of csv){
+        line = line.trim()
+        if (line>0 && line!=""){
+            solved = line;
+        }else if (line==-2 || line==-3 || line==""){
+            unchecked.push(index);
+        }
+        index++;
+    }
+    result = {
+        name: "metar",
+        solved: solved,
+        empty_offset: empty_offset,
+        unchecked: unchecked
+    }
+    return JSON.stringify(result);
+}
+
 ////////Start/Stop
 function started_calc(){
     document.querySelector("#button_calc_start").style.display = "none";
     document.querySelector("#button_calc_stop").style.display = "block";
     document.querySelector('#progress').style.display = "none";
     document.querySelector('#connection_div').style.display = "block";
+
+    executeAsync(goOverCell())
 }
 function stopped_calc(){
     document.querySelector("#button_calc_start").style.display = "block";
