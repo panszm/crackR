@@ -77,22 +77,22 @@ peer.on('open', function(id) {
         conn.on('close', function() { 
             to_me = to_me.filter(item => item !== conn);
             refreshNet();
-            conn.on('data', function(data) {
-                console.log('Received', data);
-                message = JSON.parse(data);
-                switch(message.name){
-                        case "meta":
-                            conn.send(getMetaResponse());
-                            processMetaData(message);
-                            break;
-                        case "metar":
-                            processMetaData(message);
-                            break;
-                }
-            });
-                conn.send(getMetaData());
          });
         refreshNet();
+        conn.on('data', function(data) {
+            console.log('Received', data);
+            message = JSON.parse(data);
+            switch(message.name){
+                    case "meta":
+                        conn.send(getMetaResponse());
+                        processMetaData(message);
+                        break;
+                    case "metar":
+                        processMetaData(message);
+                        break;
+            }
+        });
+            conn.send(getMetaData());
     });
 
 function connect(){
