@@ -260,8 +260,6 @@ function started_calc(){
     document.querySelector("#button_calc_stop").style.display = "block";
     document.querySelector('#progress').style.display = "none";
     document.querySelector('#connection_div').style.display = "block";
-
-    executeAsync(goOverCell())
 }
 function stopped_calc(){
     document.querySelector("#button_calc_start").style.display = "block";
