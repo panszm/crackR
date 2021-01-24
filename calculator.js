@@ -112,7 +112,8 @@ peer.on('open', function(id) {
                     processMetaData(message);
                     break;
                 case "ask":
-                    if(getVal(message.index)!=-2 && getVal(message.index)!=-1 && (getVal(message.index)<=0 || getVal(message.index)=="")){
+                    value = getVal(message.index)
+                    if(value!=-2 && value!=-1 && (value<=0 || value=="")){
                         setVal(message.index,-2)
                         response = {
                             name: "askr",
