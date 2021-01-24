@@ -255,10 +255,7 @@ function askPermission(index){
     if(to_other!=null){
         askPermissionSingle(to_other,index);
     }
-    for(conn of to_me){
-        askPermissionSingle(conn,index);
-    }
-    if(to_other==null && to_me.length==0){
+    if(to_other==null){
         current_cell=index
         executeAsync(goOverCell)
     }
