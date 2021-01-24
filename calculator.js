@@ -62,7 +62,7 @@ function reloadProgress(){
 
 //////Wheeling logic
 
-const CELL_SIZE = 2**24;
+const CELL_SIZE = 2**10;
 
 //kjbadskjbsdabkjdsadsasda
 const SOLUTION = "63d24b2a0b43b893e00369bf9f3ebbfa"
@@ -71,6 +71,7 @@ let my_id = ""
 let FOUND = false;
 let current_cell = 0;
 let current_iter = 0;
+let stopped = false;
 
 let to_other;
 let to_me = []
@@ -226,6 +227,7 @@ function askPermission(index){
         askPermissionSingle(index);
     }
     if(to_other==null && to_me.length==0){
+        current_cell=index
         executeAsync(goOverCell)
     }
 }
@@ -249,10 +251,10 @@ function update(){
 }
 
 function goOverCell(){
-    if(current_iter<CELL_SIZE && !FOUND){
-        console.log(BigInt(current_cell*CELL_SIZE+current_iter))
+    if(current_iter<CELL_SIZE && !FOUND && !stopped){
         goOverFunc()
         executeAsync(goOverCell)
+        console.log(BigInt(current_cell*CELL_SIZE+current_iter))
     }else{
         update();
         if(!FOUND){
@@ -369,6 +371,7 @@ function started_calc(){
     document.querySelector("#button_calc_stop").style.display = "block";
     document.querySelector('#progress').style.display = "none";
     document.querySelector('#connection_div').style.display = "block";
+    stopped = false;
 
     askPermission(getNextCell())
 }
@@ -376,6 +379,7 @@ function stopped_calc(){
     document.querySelector("#button_calc_start").style.display = "block";
     document.querySelector("#button_calc_stop").style.display = "none";
     document.querySelector('#connection_div').style.display = "none";
+    stopped = true;
     reloadProgress();
     document.querySelector('#progress').style.display = "block";
 }
