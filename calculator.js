@@ -133,7 +133,7 @@ peer.on('open', function(id) {
                 case "askr":
                     if(message.permission){
                         current_cell=message.index;
-                        executeAsync(goOverCell);
+                        executeAsync(goOverCellFull);
                     }else{
                         setVal(message.index,-2);
                         askPermission(getNextCell());
@@ -194,7 +194,7 @@ function connect(){
                 case "askr":
                     if(message.permission){
                         current_cell=message.index;
-                        executeAsync(goOverCell);
+                        executeAsync(goOverCellFull);
                     }else{
                         setVal(message.index,-2);
                         askPermission(getNextCell());
@@ -251,13 +251,14 @@ function getNextCell(){
 }
 
 function askPermission(index){
-    console.log("Asking for permission: "+index)
+    current_cell = index
+    current_iter = 0
     if(to_other!=null){
         askPermissionSingle(to_other,index);
     }
     if(to_other==null){
         current_cell=index
-        executeAsync(goOverCell)
+        executeAsync(goOverCellFull)
     }
 }
 
@@ -277,6 +278,11 @@ function update(){
     for(pee of to_me){
         pee.send(data);
     }
+}
+
+function goOverCellFull(){
+    setVal(current_cell,-2)
+    executeAsync(goOverCell)
 }
 
 function goOverCell(){
