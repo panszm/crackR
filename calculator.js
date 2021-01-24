@@ -91,8 +91,8 @@ peer.on('open', function(id) {
          });
         refreshNet();
         conn.on('data', function(data) {
-            console.log('Received', data);
             message = JSON.parse(data);
+            console.log('Received', message);
             switch(message.name){
                 case "meta":
                     if(data.id != my_id){
@@ -152,8 +152,8 @@ function connect(){
     conn.on('open', function() {
         refreshNet();
         conn.on('data', function(data) {
-          console.log('Received', data);
           message = JSON.parse(data);
+          console.log('Received', message);
           switch(message.name){
                 case "meta":
                     if(data.id != my_id){
