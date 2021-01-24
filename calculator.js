@@ -251,6 +251,7 @@ function getNextCell(){
 }
 
 function askPermission(index){
+    console.log("Asking for permission: "+index)
     if(to_other!=null){
         askPermissionSingle(to_other,index);
     }
@@ -268,7 +269,7 @@ function askPermissionSingle(conn,index){
         name: "ask",
         index: index
     }
-    conn.send(JSON.stringify(result.name));
+    conn.send(JSON.stringify(result));
 }
 
 function update(){
