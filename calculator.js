@@ -162,7 +162,7 @@ function connect(){
                 case "askr":
                     if(message.permission){
                         current_cell=message.index;
-                        executeAsync(goOverCell());
+                        executeAsync(goOverCell);
                     }else{
                         setVal(message.index,-2);
                         askPermission(getNextCell());
@@ -225,6 +225,9 @@ function askPermission(index){
     for(conn of to_me){
         askPermissionSingle(index);
     }
+    if(to_other==null && to_me.length==0){
+        executeAsync(goOverCell)
+    }
 }
 
 function askPermissionSingle(conn,index){
@@ -246,16 +249,23 @@ function update(){
 }
 
 function goOverCell(){
-    while(current_iter<CELL_SIZE && !FOUND){
-        checkHash(BigInt(current_cell*CELL_SIZE+current_iter))
-        current_iter+=1;
+    if(current_iter<CELL_SIZE && !FOUND){
+        console.log(BigInt(current_cell*CELL_SIZE+current_iter))
+        goOverFunc()
+        executeAsync(goOverCell)
+    }else{
+        update();
+        if(!FOUND){
+            setVal(current_cell,-1);
+            current_iter = 0;
+            askPermission(getNextCell());
+        }
     }
-    if(!FOUND){
-        setVal(current_cell,-1);
-        current_iter = 0;
-        askPermission(getNextCell());
-    }
-    update();
+}
+
+function goOverFunc(){
+    checkHash(BigInt(current_cell*CELL_SIZE+current_iter))
+    current_iter+=1;
 }
 
 function checkHash(number){
