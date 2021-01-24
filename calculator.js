@@ -1,5 +1,3 @@
-const { response } = require("express");
-
 function executeAsync(func) {
     setTimeout(func, 0);
 }
@@ -65,7 +63,10 @@ function reloadProgress(){
 //////Wheeling logic
 
 const CELL_SIZE = 2**24;
-const SOLUTION = "7fc56270e7a70fa81a5935b72eacbe29"
+
+//kjbadskjbsdabkjdsadsasda
+const SOLUTION = "63d24b2a0b43b893e00369bf9f3ebbfa"
+
 let my_id = ""
 let FOUND = false;
 let current_cell = 0;
