@@ -94,22 +94,51 @@ peer.on('open', function(id) {
             console.log('Received', data);
             message = JSON.parse(data);
             switch(message.name){
-                  case "meta":
-                      conn.send(getMetaResponse());
-                      if(to_other!=null){
-                          to_other.send(JSON.stringify(message))
-                      }
-                      for(element of to_me){
-                          if(element!=conn){
-                              element.send(JSON.stringify(message))
-                          }
-                      }
-                      processMetaData(message);
-                      break;
-                  case "metar":
-                      processMetaData(message);
-                      break;
-            }
+                case "meta":
+                    if(data.id != my_id){
+                        conn.send(getMetaResponse());
+                        if(to_other!=null){
+                            to_other.send(JSON.stringify(message))
+                        }
+                        for(element of to_me){
+                            if(element!=conn){
+                                element.send(JSON.stringify(message))
+                            }
+                        }
+                        processMetaData(message);
+                    }
+                    break;
+                case "metar":
+                    processMetaData(message);
+                    break;
+                case "ask":
+                    if(getVal(message.index)!=-2 && getVal(message.index)!=-1 && (getVal(message.index)<=0 || getVal(message.index)=="")){
+                        setVal(message.index,-2)
+                        response = {
+                            name: "askr",
+                            index: message.index,
+                            permission: true
+                        }
+                        conn.send(JSON.stringify(response))
+                    }else{
+                        response = {
+                            name: "askr",
+                            index: message.index,
+                            permission: false
+                        }
+                        conn.send(JSON.stringify(response))
+                    }
+                    break;
+                case "askr":
+                    if(message.permission){
+                        current_cell=message.index;
+                        executeAsync(goOverCell);
+                    }else{
+                        setVal(message.index,-2);
+                        askPermission(getNextCell());
+                    }
+                    break;
+          }
           });
             conn.send(getMetaData());
     });
