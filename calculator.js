@@ -62,7 +62,7 @@ function reloadProgress(){
 
 //////Wheeling logic
 
-const CELL_SIZE = 2**10;
+const CELL_SIZE = 2**24;
 
 //kjbadskjbsdabkjdsadsasda
 const SOLUTION = "63d24b2a0b43b893e00369bf9f3ebbfa"
