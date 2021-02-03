@@ -31,8 +31,8 @@ var phpExpress = require('php-express')({
 
 app.on('ready', function(){
     mainWindow = new BrowserWindow({});
-    //line below is for debug purpose only
-    mainWindow.webContents.openDevTools()
+    //debug purpose only
+    // mainWindow.webContents.openDevTools()
     
     mainWindow.loadURL(url.format({
         pathname: path.join(__dirname, 'mainWindow.html'),

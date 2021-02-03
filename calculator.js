@@ -60,89 +60,6 @@ function reloadProgress(){
     }
 }
 
-//////Wheeling logic
-
-const CELL_SIZE = 2**24;
-
-//kjbadskjbsdabkjdsadsasda
-const SOLUTION = "63d24b2a0b43b893e00369bf9f3ebbfa"
-
-let my_id = ""
-let FOUND = false;
-let current_cell = 0;
-let current_iter = 0;
-let stopped = false;
-
-let to_other;
-let to_me = []
-
-var peer = new Peer();
-
-peer.on('open', function(id) {
-    my_id = id;
-    document.querySelector("#my_id").textContent = "My_id: "+id
-  });
-
-  peer.on('connection', function(conn) {
-        to_me.push(conn);
-        conn.on('close', function() { 
-            to_me = to_me.filter(item => item !== conn);
-            refreshNet();
-         });
-        refreshNet();
-        conn.on('data', function(data) {
-            message = JSON.parse(data);
-            console.log('Received', message);
-            switch(message.name){
-                case "meta":
-                    if(data.id != my_id){
-                        conn.send(getMetaResponse());
-                        if(to_other!=null){
-                            to_other.send(JSON.stringify(message))
-                        }
-                        for(element of to_me){
-                            if(element!=conn){
-                                element.send(JSON.stringify(message))
-                            }
-                        }
-                        processMetaData(message);
-                    }
-                    break;
-                case "metar":
-                    processMetaData(message);
-                    break;
-                case "ask":
-                    value = getVal(message.index)
-                    if(value!=-2 && value!=-1 && (value<=0 || value=="")){
-                        setVal(message.index,-2)
-                        response = {
-                            name: "askr",
-                            index: message.index,
-                            permission: true
-                        }
-                        conn.send(JSON.stringify(response))
-                    }else{
-                        response = {
-                            name: "askr",
-                            index: message.index,
-                            permission: false
-                        }
-                        conn.send(JSON.stringify(response))
-                    }
-                    break;
-                case "askr":
-                    if(message.permission){
-                        current_cell=message.index;
-                        executeAsync(goOverCellFull);
-                    }else{
-                        setVal(message.index,-2);
-                        askPermission(getNextCell());
-                    }
-                    break;
-          }
-          });
-            conn.send(getMetaData());
-    });
 
 function connect(){
     document.querySelector("#button_connect").style.display = "none";
@@ -193,7 +110,7 @@ function connect(){
                     break;
                 case "askr":
                     if(message.permission){
-                        current_cell=message.index;
+                        Currents.current_cell=message.index;
                         executeAsync(goOverCellFull);
                     }else{
                         setVal(message.index,-2);
@@ -208,7 +125,7 @@ function connect(){
         to_other = null;
         refreshNet();
     });  
-
+    Currents.current_state = STATES_ENUM.CONNECTED
     to_other = conn;
 }
 
@@ -217,6 +134,7 @@ function disconnect(){
     document.querySelector("#connection_input").style.display = "block";
     document.querySelector("#button_disconnect").style.display = "none";
     to_other.close();
+    Currents.current_state = STATES_ENUM.CALCULATING
     for(item of to_me){
         item.close();
     }
@@ -251,13 +169,13 @@ function getNextCell(){
 }
 
 function askPermission(index){
-    current_cell = index
-    current_iter = 0
+    Currents.current_cell = index
+    Currents.current_iter = 0
     if(to_other!=null){
         askPermissionSingle(to_other,index);
     }
     if(to_other==null){
-        current_cell=index
+        Currents.current_cell=index
         executeAsync(goOverCellFull)
     }
 }
@@ -281,28 +199,28 @@ function update(){
 }
 
 function goOverCellFull(){
-    setVal(current_cell,-2)
+    setVal(Currents.current_cell,-2)
     executeAsync(goOverCell)
 }
 
 function goOverCell(){
-    if(current_iter<CELL_SIZE && !FOUND && !stopped){
+    if(Currents.current_iter<CELL_SIZE && !FOUND && Currents.current_state!=STATES_ENUM.default){
         goOverFunc()
         executeAsync(goOverCell)
-        console.log(BigInt(current_cell*CELL_SIZE+current_iter))
+        console.log(BigInt(Currents.current_cell*CELL_SIZE+Currents.current_iter))
     }else{
         update();
         if(!FOUND){
-            setVal(current_cell,-1);
-            current_iter = 0;
+            setVal(Currents.current_cell,-1);
+            Currents.current_iter = 0;
             askPermission(getNextCell());
         }
     }
 }
 
 function goOverFunc(){
-    checkHash(BigInt(current_cell*CELL_SIZE+current_iter))
-    current_iter+=1;
+    checkHash(BigInt(Currents.current_cell*CELL_SIZE+Currents.current_iter))
+    Currents.current_iter+=1;
 }
 
 function checkHash(number){
@@ -322,9 +240,9 @@ function checkHash(number){
 
 function solutionFound(x){
     console.log("Found Solution!: "+x);
-    setVal(current_cell,""+BigInt(current_cell*CELL_SIZE+current_iter));
+    setVal(Currents.current_cell,""+BigInt(Currents.current_cell*CELL_SIZE+Currents.current_iter));
     disconnect();
-    stopped_calc();
+    pressedStopButton();
     reloadProgress();
 }
 
@@ -400,21 +318,103 @@ function getMetaResponse(){
     return JSON.stringify(result);
 }
 
-////////Start/Stop
-function started_calc(){
+function pressedStartButton(){
     document.querySelector("#button_calc_start").style.display = "none";
     document.querySelector("#button_calc_stop").style.display = "block";
     document.querySelector('#progress').style.display = "none";
     document.querySelector('#connection_div').style.display = "block";
-    stopped = false;
-
+    Currents.current_state = STATES_ENUM.CALCULATING
     askPermission(getNextCell())
 }
-function stopped_calc(){
+function pressedStopButton(){
     document.querySelector("#button_calc_start").style.display = "block";
     document.querySelector("#button_calc_stop").style.display = "none";
     document.querySelector('#connection_div').style.display = "none";
-    stopped = true;
     reloadProgress();
+    Currents.current_state = STATES_ENUM.default
     document.querySelector('#progress').style.display = "block";
 }
+
+const CELL_SIZE = 2**24;
+const STATES_ENUM = {"default":0,"CALCULATING":1,"CONNECTED":2}
+
+//kjbadskjbsdabkjdsadsasda
+const SOLUTION = "63d24b2a0b43b893e00369bf9f3ebbfa"
+
+let my_id = ""
+let FOUND = false;
+
+
+let Currents = {"current_cell":0,"current_iter":0,"current_state":STATES_ENUM.default}
+
+let to_other;
+let to_me = []
+
+var peer = new Peer();
+
+peer.on('open', function(id) {
+    my_id = id;
+    document.querySelector("#my_id").textContent = "My_id: "+id
+  });
+
+  peer.on('connection', function(conn) {
+      Currents.current_state = STATES_ENUM.CONNECTED
+        to_me.push(conn);
+        conn.on('close', function() { 
+            to_me = to_me.filter(item => item !== conn);
+            refreshNet();
+         });
+        refreshNet();
+        conn.on('data', function(data) {
+            message = JSON.parse(data);
+            console.log('Received', message);
+            switch(message.name){
+                case "meta":
+                    if(data.id != my_id){
+                        conn.send(getMetaResponse());
+                        if(to_other!=null){
+                            to_other.send(JSON.stringify(message))
+                        }
+                        for(element of to_me){
+                            if(element!=conn){
+                                element.send(JSON.stringify(message))
+                            }
+                        }
+                        processMetaData(message);
+                    }
+                    break;
+                case "metar":
+                    processMetaData(message);
+                    break;
+                case "ask":
+                    value = getVal(message.index)
+                    if(value!=-2 && value!=-1 && (value<=0 || value=="")){
+                        setVal(message.index,-2)
+                        response = {
+                            name: "askr",
+                            index: message.index,
+                            permission: true
+                        }
+                        conn.send(JSON.stringify(response))
+                    }else{
+                        response = {
+                            name: "askr",
+                            index: message.index,
+                            permission: false
+                        }
+                        conn.send(JSON.stringify(response))
+                    }
+                    break;
+                case "askr":
+                    if(message.permission){
+                        Currents.current_cell=message.index;
+                        executeAsync(goOverCellFull);
+                    }else{
+                        setVal(message.index,-2);
+                        askPermission(getNextCell());
+                    }
+                    break;
+          }
+          });
+            conn.send(getMetaData());
+    });
