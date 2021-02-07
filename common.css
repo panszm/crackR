@@ -39,9 +39,3 @@ button {
     color: black;
     margin-bottom: 0.5em;
 }
-
-#my_id{
-    position: fixed;
-    left:2em;
-    top:1em;
-}

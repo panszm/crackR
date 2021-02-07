@@ -9,7 +9,7 @@ class MainConnector{
         this.ipcMain = ipcMain
         this.webContents = webContents;
         this.incomingConnections = [];
-        this.outcomingConnection;
+        this.outcomingConnection = null;
 
         this.server = net.createServer((socket)=>{
             this.incomingConnections.push(socket);
@@ -35,15 +35,18 @@ class MainConnector{
 
     updateConnections(){
         let argIn = "";
-        for(socket of this.incomingConnections){
+        for(let socket of this.incomingConnections){
             argIn+=socket.address().address+"\n";
         }
-        if(this.outcomingConnection!=null){
-            let argOut = this.outcomingConnection.address().address}
+        let argOut = "";
+        if(this.outcomingConnection){
+            argOut = this.outcomingConnection.address().address
+        }
+        console.log("Conns: Incoming:",argIn,"Outcoming:",argOut,"END")
     }
 
     startServer(){
-        this.server.listen(CONNECTION_PORT,'127.0.0.1')
+        this.server.listen(CONNECTION_PORT,'0.0.0.0')
     }
 
     stopServer(){

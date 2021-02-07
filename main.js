@@ -20,16 +20,17 @@ var phpExpress = require('php-express')({
     binPath: 'php'
   });
   
-  expressAppPHP.set('views', './results');
-  expressAppPHP.engine('php', phpExpress.engine);
-  expressAppPHP.set('view engine', 'php');
-  
-  expressAppPHP.all(/.+\.php$/, phpExpress.router);
+expressAppPHP.set('views', './results');
+expressAppPHP.engine('php', phpExpress.engine);
+expressAppPHP.set('view engine', 'php');
 
-  expressAppPHP.get('/modifyrow.php', (req, res) => {
-      res.sendFile(path.join(__dirname+'/modifyrow.php'));
-  })
-  phpServer = expressAppPHP.listen(phpPort, () => {})
+expressAppPHP.all(/.+\.php$/, phpExpress.router);
+
+expressAppPHP.get('/modifyrow.php', (req, res) => {
+    res.sendFile(path.join(__dirname+'/modifyrow.php'));
+})
+
+phpServer = expressAppPHP.listen(phpPort, () => {})
 
 app.on('ready', function(){
     mainWindow = new BrowserWindow({webPreferences: {
