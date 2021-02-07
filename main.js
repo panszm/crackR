@@ -2,7 +2,10 @@ const electron = require('electron');
 const url = require('url');
 const path = require('path');
 
-const {app, BrowserWindow, Menu} = electron;
+const {app, BrowserWindow, Menu, ipcMain} = electron;
+
+const {MainConnector}  = require("./mainConnection.js");
+let connector;
 
 let mainWindow;
 const express = require('express')
@@ -26,22 +29,26 @@ var phpExpress = require('php-express')({
   expressAppPHP.get('/modifyrow.php', (req, res) => {
       res.sendFile(path.join(__dirname+'/modifyrow.php'));
   })
-  phpServer = expressAppPHP.listen(phpPort, () => {
-})
+  phpServer = expressAppPHP.listen(phpPort, () => {})
 
 app.on('ready', function(){
-    mainWindow = new BrowserWindow({});
+    mainWindow = new BrowserWindow({webPreferences: {
+        nodeIntegration: true
+    }});
+    
     //debug purpose only
-    // mainWindow.webContents.openDevTools()
+    mainWindow.webContents.openDevTools()
     
     mainWindow.loadURL(url.format({
         pathname: path.join(__dirname, 'mainWindow.html'),
         protocol: 'file:',
         slashes: true
     }))
-
+    
     const mainMenu = Menu.buildFromTemplate(mainMenuTemplateOFF);
     Menu.setApplicationMenu(mainMenu);
+
+   connector = new MainConnector(ipcMain,mainWindow.webContents);
 });
 
 expressApp.get('/', (req, res) => {

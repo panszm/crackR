@@ -33,7 +33,7 @@ button {
     display: none;
 }
 
-#connection_input{
+#connectionInput{
     background-color: white;
     min-width: 12em;
     color: black;
