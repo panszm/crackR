@@ -8,10 +8,11 @@ class Abstract_CrackrState {
         this.context = crackrContext
     }
 
-    refresh(topButtonText,connectionDivDisplay,bottomButtonText){
+    refresh(topButtonText,connectionDivDisplay,bottomButtonText,connectionInputDisplay){
         this.context.topButton.textContent = topButtonText;
         this.context.connectionDiv.style.display = connectionDivDisplay;
         this.context.bottomButton.textContent = bottomButtonText;
+        this.context.connectionInput.style.display = connectionInputDisplay
     }
     handleTopButtonPressed(){}
     handleBottomButtonPressed(){}
@@ -19,7 +20,7 @@ class Abstract_CrackrState {
 
 class IdleCrackrState extends Abstract_CrackrState{
     refresh(){
-        super.refresh("Start Calculations","none","")
+        super.refresh("Start Calculations","none","","none")
     }
 
     handleTopButtonPressed(){
@@ -30,7 +31,7 @@ class IdleCrackrState extends Abstract_CrackrState{
 
 class CalculatingCrackrState extends Abstract_CrackrState{
     refresh(){
-        super.refresh("Stop Calculations","block","Connect")
+        super.refresh("Stop Calculations","block","Connect","block")
     }
 
     handleTopButtonPressed(){
@@ -46,11 +47,16 @@ class CalculatingCrackrState extends Abstract_CrackrState{
 
 class CalculatingAndConnectedCrackrState extends Abstract_CrackrState{
     refresh(){
-        super.refresh("Stop Calculations and Disconnect","block","Disconnect")
+        super.refresh("Stop Calculations and Disconnect","block","Disconnect","none")
     }
 
     handleTopButtonPressed(){
         this.context.changeState(IdleCrackrState);
+    }
+
+    handleBottomButtonPressed(){
+        this.context.connector.disconnectOutcomingConnection();
+        this.context.changeState(CalculatingCrackrState)
     }
 }
 
@@ -94,6 +100,13 @@ class CrackrContext{
         this.calculator = new Calculator();
     }
 
+    connectedOut(){
+        this.changeState(CalculatingAndConnectedCrackrState)
+    }
+
+    disconnectedOut(){
+        this.changeState(CalculatingCrackrState)
+    }
 }
 
 export default CrackrContext;

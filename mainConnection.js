@@ -12,21 +12,36 @@ class MainConnector{
         this.outcomingConnection = null;
 
         this.server = net.createServer((socket)=>{
+            socket.on('close',()=>{
+                this.handleIncomingDisconnection(socket);
+            });
+            socket.on('end',()=>{
+                this.handleIncomingDisconnection(socket);
+            });
+            socket.on('timeout',()=>{
+                this.handleIncomingDisconnection(socket);
+            });
+
+            this.webContents.send('connectedIn','true');
             this.incomingConnections.push(socket);
             this.updateConnections();
 
-            socket.on('close',(err)=>{
-                this.incomingConnections = this.incomingConnections.filter((conn)=>{return conn!=socket});
-                this.updateConnections();
-            })
-            
             socket.pipe(socket);
         });
         this.startServer();
 
-        ipcMain.handle('connectTo', (event,arg) => {
+        ipcMain.handle('connectOut', (event,arg) => {
             this.connectTo(arg);
         })
+        ipcMain.handle('disconnectOut',(event)=>{
+            this.disconnectFrom();
+        })
+    }
+
+    handleIncomingDisconnection(socket){
+        this.webContents.send('disconnectedIn','true');
+        this.incomingConnections = this.incomingConnections.filter((conn)=>{return conn!=socket});
+        this.updateConnections();
     }
 
     executeCommand(command){
@@ -36,13 +51,15 @@ class MainConnector{
     updateConnections(){
         let argIn = "";
         for(let socket of this.incomingConnections){
-            argIn+=socket.address().address+"\n";
+            argIn+=socket.remoteAddress+"\n";
         }
         let argOut = "";
         if(this.outcomingConnection){
-            argOut = this.outcomingConnection.address().address
+            argOut = this.outcomingConnection.remoteAddress
         }
         console.log("Conns: Incoming:",argIn,"Outcoming:",argOut,"END")
+        this.webContents.send('update-connections-out',argOut)
+        this.webContents.send('update-connections-in',argIn)
     }
 
     startServer(){
@@ -57,21 +74,28 @@ class MainConnector{
     }
 
     connectTo(targetIP){
+        if(this.outcomingConnection!=null){
+            this.outcomingConnection.destroy();
+        }
         this.outcomingConnection = new net.Socket();
         this.outcomingConnection.connect(CONNECTION_PORT,targetIP,()=>{
+            this.webContents.send('connectedOut','true');
             this.updateConnections();
         })
         this.outcomingConnection.on('data',(data)=>{
             console.log(data);
         });
         this.outcomingConnection.on('close',(err)=>{
+            this.webContents.send('disconnectedOut','true');
             this.outcomingConnection = null;
             this.updateConnections();
         })
     }
 
     disconnectFrom(){
-        this.outcomingConnection.close();
+        if(this.outcomingConnection){
+            this.outcomingConnection.destroy();
+        }
     }
 }
 
