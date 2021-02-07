@@ -38,7 +38,8 @@ class MainConnector{
         for(socket of this.incomingConnections){
             argIn+=socket.address().address+"\n";
         }
-        if(this.outcomingConnection!=null) let argOut = this.outcomingConnection.address().address
+        if(this.outcomingConnection!=null){
+            let argOut = this.outcomingConnection.address().address}
     }
 
     startServer(){
