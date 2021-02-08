@@ -60,6 +60,7 @@ class Calculator{
         if(this.state==STATES_ENUM.calculating){
             this.state = STATES_ENUM.calculatingAndConnected;
             this.stopFlag = true;
+            this.updateCell()
         }
         setTimeout(()=>this.startCalculation(),1000)
     }
