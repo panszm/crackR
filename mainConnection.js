@@ -106,22 +106,22 @@ class MainConnector{
                     }
                     break;
                 case "MayI":
-                    if(getValFromResults(arg[1])=='-2'){
-                        this.sendMessage("Nope "+arg[1]);
+                    if(getValFromResults(args[1])=='-2'){
+                        this.sendMessage("Nope "+args[1]);
                     }
                     break;
                 case "Nope":
-                    if(arg[1]==this.lastResponse){
+                    if(args[1]==this.lastResponse){
                         this.waitingForPermission = false;
                     }
                     break;
                 case "Resolved":
-                    this.webContents.send('updateVal',[arg[1],arg[2]]);
+                    this.webContents.send('updateVal',[args[1],args[2]]);
                     break;
                 case "Having":
                     let current_cell = getFirstMinusTwo();
-                    if(arg[1]==current_cell){
-                        if(arg[2]<this.currentTimestamp){
+                    if(args[1]==current_cell){
+                        if(args[2]<this.currentTimestamp){
                             this.webContents.send('updateVal',[current_cell,"-3"]);
                             this.webContents.send('restartCalculations','true')
                         }else{
