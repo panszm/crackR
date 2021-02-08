@@ -1,4 +1,4 @@
-import * as resultsAPI from './resultsAPI.js'
+const {setVal, getFirstUnresolved, isSolved} = require('./resultsAPI.js');
 
 // //a
 // const HASH_BEING_CRACKED = "0cc175b9c0f1b6a831c399e269772661"
@@ -7,54 +7,95 @@ import * as resultsAPI from './resultsAPI.js'
 const HASH_BEING_CRACKED = "74b87337454200d4d33f80c4663dc5e5"
 
 const CELL_SIZE = 2**24;
-const STATES_ENUM = {"idle":-1, "calculating":0, "solutionFound":1, "awaitingResponse":2};
+const STATES_ENUM = {"idle":-1, "calculating":0, "solutionFound":1, "calculatingAndConnected":2};
 
 class Calculator{
-    constructor(){
+    constructor(context){
+        this.context = context;
         this.state = STATES_ENUM.idle;
-        this.currentCell = resultsAPI.getFirstUnresolved();
+        this.currentCell = getFirstUnresolved();
         this.currentIteration = 0;
+        this.stopFlag = false;
     }
 
     updateCell(){
-        this.currentCell = resultsAPI.getFirstUnresolved();
+        this.currentCell = getFirstUnresolved();
     }
 
     stopCalculation(){
         this.state = STATES_ENUM.idle;
     }
 
-    startCalculationOffline(){
-        this.state = STATES_ENUM.calculating;
-        this.updateCell();
-        executeAsync(()=>this.checkConditionForNextIteration(this));
+    startCalculation(){
+        if(this.state != STATES_ENUM.calculatingAndConnected){
+            this.state = STATES_ENUM.calculating;
+        }
+        this.restartCalculation();
     }
 
+    restartCalculation(){
+        let func = async()=>{
+            if(!isSolved()){
+                this.updateCell();
+                if(this.state == STATES_ENUM.calculatingAndConnected){
+                    let isCellOK = await this.context.isCellNotTaken(this.currentCell);
+                    if(!isCellOK){
+                        setVal(this.currentCell,"-2");
+                        this.restartCalculation();
+                        return;
+                    }
+                }
+                this.stopFlag = false;
+                setVal(this.currentCell,"-2");
+                executeAsync(()=>this.checkConditionForNextIteration(this));
+            }else{
+                alert("SOLUTION ALREADY FOUND");
+            }
+        }
+        func()
+    }
 
-    checkConditionForNextIteration(self){
-        if(self.state==STATES_ENUM.calculating && self.currentIteration<CELL_SIZE){
-            executeAsync(()=>self.checkNextIteration(self));
-        }else if(self.currentIteration>=CELL_SIZE){
-            executeAsync(()=>self.finalizeCell(self))
+    goOnline(){
+        if(this.state==STATES_ENUM.calculating){
+            this.state = STATES_ENUM.calculatingAndConnected;
+            this.stopFlag = true;
+            this.context.exchangeResults();
+        }
+        setTimeout(()=>this.startCalculation(),1000)
+    }
+
+    goOffline(){
+        if(this.state==STATES_ENUM.calculatingAndConnected){
+            this.state = STATES_ENUM.calculating;
         }
     }
 
-    checkNextIteration(self){
-        if(checkHash(BigInt(CELL_SIZE*self.currentCell+self.currentIteration))){
-            resultsAPI.setVal(this.currentCell,BigInt(CELL_SIZE*self.currentCell+self.currentIteration));
-            self.state = STATES_ENUM.solutionFound;
+    checkConditionForNextIteration(){
+        if((this.state == STATES_ENUM.calculating || this.state == STATES_ENUM.calculatingAndConnected) && this.currentIteration<CELL_SIZE && !this.stopFlag){
+            executeAsync(()=>this.checkNextIteration(this));
+        }else if(this.currentIteration>=CELL_SIZE){
+            executeAsync(()=>this.finalizeCell(this))
+        }else if(this.stopFlag){
+            setVal(this.currentCell,"");
+        }
+    }
+
+    checkNextIteration(){
+        if(checkHash(BigInt(CELL_SIZE*this.currentCell+this.currentIteration))){
+            setVal(this.currentCell,BigInt(CELL_SIZE*this.currentCell+this.currentIteration));
+            this.state = STATES_ENUM.solutionFound;
             alert("SOLUTION FOUND");
         }else{
-            self.currentIteration++;
+            this.currentIteration++;
         }
-        executeAsync(()=>self.checkConditionForNextIteration(self));
+        executeAsync(()=>this.checkConditionForNextIteration());
     }
 
-    finalizeCell(self){
-        resultsAPI.setVal(self.currentCell,"-1");
-            if(self.state==STATES_ENUM.calculating){
-                self.startCalculationOffline();
-            }
+    finalizeCell(){
+        setVal(this.currentCell,"-1");
+        if(this.state==STATES_ENUM.calculating){
+            this.restartCalculation();
+        }
     }
 }
 
@@ -71,7 +112,7 @@ function checkHash(number){
 }
 
 function decodeStringFromBigInt(number){
-    // console.log(number)
+    console.log(number)
     let key = ""
     while(number>0){
         let rest = number%BigInt(256)

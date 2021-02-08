@@ -21,11 +21,13 @@ class Abstract_CrackrState {
 class IdleCrackrState extends Abstract_CrackrState{
     refresh(){
         super.refresh("Start Calculations","none","","none")
+        require('./resultsAPI.js').cleanResults();
     }
 
     handleTopButtonPressed(){
         this.context.changeState(CalculatingCrackrState);
-        this.context.calculator.startCalculationOffline();
+        this.context.calculator.startCalculation();
+        this.context.connector.startServer();
     }
 }
 
@@ -36,6 +38,7 @@ class CalculatingCrackrState extends Abstract_CrackrState{
 
     handleTopButtonPressed(){
         this.context.calculator.stopCalculation();
+        this.context.connector.stopServer();
         this.context.changeState(IdleCrackrState);
     }
 
@@ -51,6 +54,8 @@ class CalculatingAndConnectedCrackrState extends Abstract_CrackrState{
     }
 
     handleTopButtonPressed(){
+        this.context.calculator.stopCalculation();
+        this.context.connector.stopServer();
         this.context.changeState(IdleCrackrState);
     }
 
@@ -68,7 +73,6 @@ class CrackrContext{
         this.connectionInput = document.querySelector('#'+connectionInputId);
         
         this.changeState(IdleCrackrState)
-        this.setupUI();
         this.refresh();
         this.initializeOperationObjects();
     }
@@ -76,11 +80,6 @@ class CrackrContext{
     changeState(StateType){
         this.state = new StateType(this);
         this.refresh();
-    }
-    
-    setupUI(){
-        this.topButton.onclick = () => this.handleTopButtonPressed();
-        this.bottomButton.onclick = () => this.handleBottomButtonPressed();
     }
 
     refresh(){
@@ -97,15 +96,27 @@ class CrackrContext{
     
     initializeOperationObjects(){
         this.connector = new Connector(this);
-        this.calculator = new Calculator();
+        this.calculator = new Calculator(this);
     }
 
     connectedOut(){
         this.changeState(CalculatingAndConnectedCrackrState)
+        this.calculator.goOnline()
     }
 
     disconnectedOut(){
-        this.changeState(CalculatingCrackrState)
+        if(typeof(this.state)===CalculatingAndConnectedCrackrState){
+            this.changeState(CalculatingCrackrState)
+        }
+        this.calculator.goOffline();
+    }
+
+    exchangeResults(){
+        this.connector.exchangeResults();
+    }
+
+    isCellNotTaken(index){
+        return this.connector.isCellNotTaken(index);
     }
 }
 

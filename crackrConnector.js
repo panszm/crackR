@@ -26,15 +26,32 @@ class Connector{
     }
 
     tryToConnectToIP(targetIP){
-        ipcRenderer.invoke('connectOut', targetIP)
+        ipcRenderer.invoke('connectOut', targetIP);
     }
 
     disconnectOutcomingConnection(){
-        ipcRenderer.invoke('disconnectOut')
+        ipcRenderer.invoke('disconnectOut');
     }
 
     disconnectIncomingConnections(){
 
+    }
+
+    startServer(){
+        ipcRenderer.invoke('startServer');
+    }
+
+    stopServer(){
+        ipcRenderer.invoke('stopServer');
+    }
+
+    exchangeResults(){
+
+    }
+
+    isCellNotTaken(index){
+        const result = ipcRenderer.invoke('isCellNotTaken',index);
+        return result;
     }
 
 }

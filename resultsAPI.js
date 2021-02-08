@@ -32,7 +32,7 @@ function getVal(row){
 
 function isSolved(){
     const csv = loadFile('./results/data.csv').split('\n');
-    for(line of csv){
+    for(let line of csv){
         line = line.trim();
         if(line!="" && line>=0){
             return line;
@@ -60,4 +60,4 @@ function getFirstUnresolved(){
     return csv.length;
 }
 
-export {setVal,getVal,isSolved,cleanResults,getFirstUnresolved};
+module.exports = {setVal,getVal,isSolved,cleanResults,getFirstUnresolved};

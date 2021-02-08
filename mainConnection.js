@@ -1,6 +1,4 @@
-const { Main } = require('electron');
 const net = require('net');
-const { server } = require('websocket');
 
 const CONNECTION_PORT = 8090;
 
@@ -10,6 +8,8 @@ class MainConnector{
         this.webContents = webContents;
         this.incomingConnections = [];
         this.outcomingConnection = null;
+        this.waitingForPermission = false;
+        this.lastResponse = null;
 
         this.server = net.createServer((socket)=>{
             socket.on('close',()=>{
@@ -22,13 +22,26 @@ class MainConnector{
                 this.handleIncomingDisconnection(socket);
             });
 
+            socket.on('data',(data)=>{
+                data = data.toString("utf-8")
+                let args = data.split(" ");
+                switch(args[0]){
+                    case "cellAvailability":
+                        socket.write("cellAvailabilityResponse "+this.respondIfCellAvailable(args[1]));
+                        break;
+                    case "cellAvailabilityResponse":
+                        this.lastResponse = args[1];
+                        this.waitingForPermission = false;
+                        break;
+                }
+            })
+
             this.webContents.send('connectedIn','true');
             this.incomingConnections.push(socket);
             this.updateConnections();
 
             socket.pipe(socket);
         });
-        this.startServer();
 
         ipcMain.handle('connectOut', (event,arg) => {
             this.connectTo(arg);
@@ -36,6 +49,38 @@ class MainConnector{
         ipcMain.handle('disconnectOut',(event)=>{
             this.disconnectFrom();
         })
+        ipcMain.handle('startServer',(event)=>{
+            this.startServer();
+        })
+        ipcMain.handle('stopServer',(event)=>{
+            this.stopServer();
+        })
+        ipcMain.handle('isCellNotTaken',(event,arg)=>{
+            return this.askIfCellAvailable(arg);
+        })
+    }
+    
+    askIfCellAvailable(index){
+        if(this.outcomingConnection){
+            this.waitingForPermission = true;
+            this.outcomingConnection.write("cellAvailability "+index);
+            for (let i = 0;i<=100;i++){
+                setTimeout(()=>{},100);
+                if(!this.waitingForPermission){return this.lastResponse;};
+            }
+        }
+        return true;
+    }
+
+    respondIfCellAvailable(index){
+        let value = getValFromResults(index)
+        if(value == "-1" || value=="-2"){
+            return false;
+        }
+        if(this.outcomingConnection){
+            return this.askIfCellAvailable(index);
+        }
+        return true;
     }
 
     handleIncomingDisconnection(socket){
@@ -57,7 +102,6 @@ class MainConnector{
         if(this.outcomingConnection){
             argOut = this.outcomingConnection.remoteAddress
         }
-        console.log("Conns: Incoming:",argIn,"Outcoming:",argOut,"END")
         this.webContents.send('update-connections-out',argOut)
         this.webContents.send('update-connections-in',argIn)
     }
@@ -68,6 +112,12 @@ class MainConnector{
 
     stopServer(){
         this.server.close();
+        for(let conn of this.incomingConnections){
+            conn.destroy();
+        }
+        if(this.outcomingConnection){
+            this.outcomingConnection.destroy();
+        }
         this.incomingConnections = [];
         this.outcomingConnection = null;
         this.updateConnections();
@@ -83,7 +133,17 @@ class MainConnector{
             this.updateConnections();
         })
         this.outcomingConnection.on('data',(data)=>{
-            console.log(data);
+            data = data.toString("utf-8")
+            let args = data.split(" ");
+            switch(args[0]){
+                case "cellAvailability":
+                    socket.write("cellAvailabilityResponse "+this.respondIfCellAvailable(args[1]));
+                    break;
+                case "cellAvailabilityResponse":
+                    this.lastResponse = args[1];
+                    this.waitingForPermission = false;
+                    break;
+            }
         });
         this.outcomingConnection.on('close',(err)=>{
             this.webContents.send('disconnectedOut','true');
@@ -97,6 +157,15 @@ class MainConnector{
             this.outcomingConnection.destroy();
         }
     }
+}
+fs = require('fs')
+
+function getValFromResults(index){
+    result = fs.readFileSync('./results/data.csv', 'utf8').split('\n');
+    if(result.length<=index){
+        return "";
+    }
+    return result[index];
 }
 
 module.exports = {MainConnector};

@@ -1,5 +1,5 @@
 import CrackrContext from './crackrContext.js';
-import * as resultsAPI from './resultsAPI.js';
+const {cleanResults} = require('./resultsAPI.js');
 const { networkInterfaces } = require('os');
 
 const nets = networkInterfaces();
@@ -7,8 +7,11 @@ const results = {};
 
 window.onload = () => {
     document.querySelector("#myLocalIPs").textContent = "MyLocalIPs: "+getLocalIPs();
-    resultsAPI.cleanResults()
-    const context = new CrackrContext("topButton","bottomButton","connectionDiv","connectionInput");
+    cleanResults()
+    let context = new CrackrContext("topButton","bottomButton","connectionDiv","connectionInput");
+    
+    document.querySelector("#topButton").onclick = ()=>context.handleTopButtonPressed()
+    document.querySelector("#bottomButton").onclick = ()=>context.handleBottomButtonPressed()
 }
 
 function getLocalIPs(){
