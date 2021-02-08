@@ -40,8 +40,8 @@ class MainConnector{
                             for(let i=0;i<args[1];i++){
                                 this.webContents.send('updateVal',[i,"-1"]);
                             }
-                            this.webContents.send('updateCell','true');
                             this.webContents.send('updateVal',[args[1],"-2"]);
+                            this.webContents.send('updateCell','true');
                         }
                         break;
                 }
