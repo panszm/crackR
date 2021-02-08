@@ -91,7 +91,7 @@ class MainConnector{
 
     respondIfCellAvailable(index){
         let value = getValFromResults(index);
-        value = value.trim();
+        value = value.trim("\n");
         if(value<0){
             return false;
         }
