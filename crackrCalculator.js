@@ -61,6 +61,7 @@ class Calculator{
             this.state = STATES_ENUM.calculatingAndConnected;
             this.stopFlag = true;
             this.updateCell()
+            setVal(this.currentCell,"-2");
         }
         setTimeout(()=>this.startCalculation(),1000)
     }
