@@ -39,6 +39,7 @@ class Calculator{
                 this.updateCell();
                 if(this.state == STATES_ENUM.calculatingAndConnected){
                     let isCellOK = await this.context.isCellNotTaken(this.currentCell);
+                    console.log(isCellOK);
                     if(!isCellOK){
                         setVal(this.currentCell,"-2");
                         this.restartCalculation();
@@ -112,7 +113,7 @@ function checkHash(number){
 }
 
 function decodeStringFromBigInt(number){
-    console.log(number)
+    // console.log(number)
     let key = ""
     while(number>0){
         let rest = number%BigInt(256)

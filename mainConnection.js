@@ -27,6 +27,7 @@ class MainConnector{
                 let args = data.split(" ");
                 switch(args[0]){
                     case "cellAvailability":
+                        console.log(this.respondIfCellAvailable(args[1]))
                         socket.write("cellAvailabilityResponse "+this.respondIfCellAvailable(args[1]));
                         break;
                     case "cellAvailabilityResponse":
@@ -55,18 +56,24 @@ class MainConnector{
         ipcMain.handle('stopServer',(event)=>{
             this.stopServer();
         })
-        ipcMain.handle('isCellNotTaken',(event,arg)=>{
-            return this.askIfCellAvailable(arg);
+        ipcMain.handle('isCellNotTaken',async(event,arg)=>{
+            const result = await this.askIfCellAvailable(arg);
+            return result;
         })
     }
-    
-    askIfCellAvailable(index){
+
+    sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    async askIfCellAvailable(index){
         if(this.outcomingConnection){
             this.waitingForPermission = true;
             this.outcomingConnection.write("cellAvailability "+index);
-            for (let i = 0;i<=100;i++){
-                setTimeout(()=>{},100);
-                if(!this.waitingForPermission){return this.lastResponse;};
+            for(let i = 0;i<50;i++){
+                await this.sleep(200)
+                console.log(i);
+                if(!this.waitingForPermission){return this.lastResponse;}
             }
         }
         return true;
@@ -137,7 +144,7 @@ class MainConnector{
             let args = data.split(" ");
             switch(args[0]){
                 case "cellAvailability":
-                    socket.write("cellAvailabilityResponse "+this.respondIfCellAvailable(args[1]));
+                    this.outcomingConnection.write("cellAvailabilityResponse "+this.respondIfCellAvailable(args[1]));
                     break;
                 case "cellAvailabilityResponse":
                     this.lastResponse = args[1];
