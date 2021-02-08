@@ -81,10 +81,13 @@ class MainConnector{
             let args = message.split(" ");
             switch(args[0]){
                 case "Hello":
-                    if(args[1]>getFirstNonMinusOne()){
+                    let firstNotMinusOne = getFirstNonMinusOne();
+                    if(args[1]>firstNotMinusOne){
                         for(let i=0;i<args[1];i++){
                             this.webContents.send('updateVal',[i,"-1"]);
                         }
+                    }else if(args[1]<firstNotMinusOne){
+                        this.sendMessage("Hello "+firstNotMinusOne)
                     }
             }
         }
