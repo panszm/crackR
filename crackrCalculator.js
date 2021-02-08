@@ -39,7 +39,8 @@ class Calculator{
                 this.updateCell();
                 if(this.state == STATES_ENUM.calculatingAndConnected){
                     let isCellOK = await this.context.isCellNotTaken(this.currentCell);
-                    console.log("IsCellOK:",isCellOK);
+                    isCellOK = isCellOK.trim("\n")
+                    console.log("IsCellOK:"+isCellOK+":");
                     if(!isCellOK){
                         setVal(this.currentCell,"-2");
                         this.restartCalculation();

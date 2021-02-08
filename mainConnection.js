@@ -76,9 +76,10 @@ class MainConnector{
 
     respondIfCellAvailable(index){
         let value = getValFromResults(index);
+        value = value.trim();
         console.log("VAL:",value)
         console.log("INDEX:",index)
-        if(value == "-1" || value=="-2"){
+        if(value<0){
             return false;
         }
         if(this.outcomingConnection!=null){
