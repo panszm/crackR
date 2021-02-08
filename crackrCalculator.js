@@ -13,7 +13,7 @@ class Calculator{
     constructor(context){
         this.context = context;
         this.state = STATES_ENUM.idle;
-        this.currentCell = getFirstUnresolved();
+        this.updateCell();
         this.currentIteration = 0;
         this.stopFlag = false;
     }

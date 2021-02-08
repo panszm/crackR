@@ -53,7 +53,7 @@ function cleanResults(){
 function getFirstUnresolved(){
     const csv = loadFile('./results/data.csv').split('\n');
     for(let i=0;i<csv.length;i++){
-        if(csv[i]==""){
+        if(csv[i]>=0){
             return i;
         }
     }
