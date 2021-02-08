@@ -76,6 +76,7 @@ class MainConnector{
 
     respondIfCellAvailable(index){
         let value = getValFromResults(index);
+        console.log("VAL:",value,"INDEX:",index)
         if(value == "-1" || value=="-2"){
             return false;
         }
@@ -143,7 +144,7 @@ class MainConnector{
             switch(args[0]){
                 case "cellAvailabilityResponse":
                     console.log(args)
-                    this.lastResponse = args;
+                    this.lastResponse = args[1];
                     this.waitingForPermission = false;
                     break;
             }
@@ -161,9 +162,9 @@ class MainConnector{
         }
     }
 }
-fs = require('fs')
 
 function getValFromResults(index){
+    fs = require('fs')
     result = fs.readFileSync('./results/data.csv', 'utf8').split('\n');
     if(result.length<=index){
         return "";
