@@ -1,6 +1,7 @@
 import './crackrCalculator.js'
 import Connector from './crackrConnector.js';
 import Calculator from './crackrCalculator.js';
+import { cleanResults } from './resultsAPI.js';
 
 class Abstract_CrackrState {
     constructor(crackrContext){
@@ -37,6 +38,7 @@ class CalculatingCrackrState extends Abstract_CrackrState{
     handleTopButtonPressed(){
         this.context.calculator.stopCalculation();
         this.context.connector.stopServer();
+        cleanResults();
         this.context.changeState(IdleCrackrState);
     }
 }
@@ -66,14 +68,6 @@ class CrackrContext{
     initializeOperationObjects(){
         this.connector = new Connector(this);
         this.calculator = new Calculator(this);
-    }
-
-    connected(){
-        this.calculator.goOnline()
-    }
-
-    disconnected(){
-        this.calculator.goOffline();
     }
 
     isCellNotTaken(index){

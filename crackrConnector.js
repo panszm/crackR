@@ -6,12 +6,6 @@ class Connector{
     constructor(context){
         this.context = context;
 
-        ipcRenderer.on('connectedOut',(event,arg)=>{
-            this.context.connectedOut();
-        })
-        ipcRenderer.on('disconnectedOut',(event,arg)=>{
-            this.context.disconnectedOut();
-        })
         ipcRenderer.on('updateVal',(event,arg)=>{
             setVal(arg[0],arg[1]);
         })
@@ -22,14 +16,6 @@ class Connector{
             this.context.restartCalculations();
         })
         new ResultsIterator();
-    }
-
-    tryToConnectToIP(targetIP){
-        ipcRenderer.invoke('connectOut', targetIP);
-    }
-
-    disconnectOutcomingConnection(){
-        ipcRenderer.invoke('disconnectOut');
     }
 
     updateVals(index,value){
