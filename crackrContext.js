@@ -24,8 +24,8 @@ class IdleCrackrState extends Abstract_CrackrState{
 
     handleTopButtonPressed(){
         this.context.changeState(CalculatingCrackrState);
-        this.context.calculator.startCalculation();
         this.context.connector.startServer();
+        this.context.calculator.startCalculation();
     }
 }
 
@@ -79,6 +79,18 @@ class CrackrContext{
     isCellNotTaken(index){
         const result = this.connector.isCellNotTaken(index);
         return result;
+    }
+
+    restartCalculations(){
+        this.calculator.restartCalculation();
+    }
+
+    cellResolved(index, value){
+        this.connector.cellResolved(index,value);
+    }
+
+    updateTimestamp(timestamp){
+        this.connector.updateTimestamp(timestamp);
     }
 }
 

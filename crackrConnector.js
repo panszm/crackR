@@ -5,7 +5,7 @@ const { ipcRenderer } = require('electron')
 class Connector{
     constructor(context){
         this.context = context;
-        
+
         ipcRenderer.on('connectedOut',(event,arg)=>{
             this.context.connectedOut();
         })
@@ -18,6 +18,9 @@ class Connector{
         ipcRenderer.on('updateCell',(event,arg)=>{
             this.context.calculator.updateCell();
         })
+        ipcRenderer.on('restartCalculations',(event,arg)=>{
+            this.context.restartCalculations();
+        })
         new ResultsIterator();
     }
 
@@ -29,8 +32,8 @@ class Connector{
         ipcRenderer.invoke('disconnectOut');
     }
 
-    updateVals(row,val){
-        ipcRenderer.invoke('updateVals', [row,val])
+    updateVals(index,value){
+        ipcRenderer.invoke('updateVals', [index,value])
     }
 
     startServer(){
@@ -44,6 +47,14 @@ class Connector{
     isCellNotTaken(index){
         const result = ipcRenderer.invoke('isCellNotTaken',index);
         return result;
+    }
+
+    cellResolved(index,value){
+        ipcRenderer.invoke('cellResolved',[index,value])
+    }
+
+    updateTimestamp(timestamp){
+        ipcRenderer.invoke('updateTimestamp',timestamp);
     }
 
 }
