@@ -1,3 +1,66 @@
+class ResultsIterator{
+    constructor(){
+        const csv = loadFile('./results/data.csv').split('\n');
+        this.emptyIndexes = [];
+        this.elements = this.extractRows(csv);
+        this.indexes = Object.keys(this.elements);
+        this.currentIterator = 0;
+    }
+
+    restartIterator(){
+        this.currentIterator = 0;
+    }
+
+    getCurrentRowIndex(){
+        return this.indexes[this.currentIterator];
+    }
+
+    getFirstEmpty(){
+        if(this.emptyIndexes.length>0){
+            return this.emptyIndexes[0];
+        }else{
+            return this.indexes.length;
+        }
+    }
+
+    hasNext(){
+        if(this.currentIterator>=this.indexes.length){
+            return false;
+        }
+        return true;
+    }
+
+    next(){
+        this.currentIterator++;
+        if(this.hasNext()){
+            return this.elements[this.indexes[this.currentIterator]];
+        }
+        return false;
+    }
+
+    getExact(index){
+        if(this.indexes.includes(index)){
+            return this.elements[index];
+        }
+        return false;
+    }
+
+    extractRows(csv){
+        let result = {};
+        let indexIterator = 0;
+        for(let line of csv){
+            line = line.trim();
+            if(line.length>0){
+                result[indexIterator] = line;
+            }else{
+                this.emptyIndexes.push(indexIterator);
+            }
+            indexIterator++;
+        }
+        return result;
+    }
+}
+
 function loadFile(filePath) {
     var result = null;
     var xmlhttp = new XMLHttpRequest();
@@ -31,33 +94,27 @@ function getVal(row){
 }
 
 function isSolved(){
-    const csv = loadFile('./results/data.csv').split('\n');
-    for(let line of csv){
-        line = line.trim();
-        if(line!="" && line>=0){
-            return line;
+    let resIter = new ResultsIterator();
+    while(resIter.hasNext()){
+        let curr_elem = resIter.next();
+        if(curr_elem>=0){
+            return curr_elem;
         }
     }
-    return false;
 }
 
 function cleanResults(){
-    const csv = loadFile('./results/data.csv').split('\n');
-    for(let i=0;i<csv.length;i++){
-        if(csv[i]<-1){
-            setVal(i,"")
+    let resIter = new ResultsIterator();
+    while(resIter.hasNext()){
+        if(resIter.next()<-1){
+            setVal(resIter.getCurrentRowIndex(),"")
         }
     }
 }
 
 function getFirstUnresolved(){
-    const csv = loadFile('./results/data.csv').split('\n');
-    for(let i=0;i<csv.length;i++){
-        if(csv[i]>=0){
-            return i;
-        }
-    }
-    return csv.length;
+    let resIter = new ResultsIterator();
+    return resIter.getFirstEmpty();
 }
 
-module.exports = {setVal,getVal,isSolved,cleanResults,getFirstUnresolved};
+module.exports = {ResultsIterator,setVal,getVal,isSolved,cleanResults,getFirstUnresolved};

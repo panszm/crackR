@@ -1,5 +1,5 @@
 import CrackrContext from './crackrContext.js';
-const {cleanResults} = require('./resultsAPI.js');
+const {ResultsIterator,cleanResults, isSolved} = require('./resultsAPI.js');
 const { networkInterfaces } = require('os');
 
 const nets = networkInterfaces();
@@ -10,8 +10,30 @@ window.onload = () => {
     cleanResults()
     let context = new CrackrContext("topButton","bottomButton","connectionDiv","connectionInput");
     
-    document.querySelector("#topButton").onclick = ()=>context.handleTopButtonPressed()
-    document.querySelector("#bottomButton").onclick = ()=>context.handleBottomButtonPressed()
+    document.querySelector("#topButton").onclick = ()=>handleTopButtonPressed(context)
+    document.querySelector("#bottomButton").onclick = ()=>handleBottomButtonPressed(context)
+}
+
+function handleTopButtonPressed(context){
+    let resIter = new ResultsIterator();
+    let resultString = ""
+    if(isSolved()){
+        resultString = "solution found"
+    }else{
+        let i = 0;
+        while(resIter.hasNext()){
+            if (resIter.next()=='-1'){
+                i++;
+            }
+        }
+        resultString = i+" cells checked, solution yet to be found";
+    }
+    document.querySelector("#progressDescription").textContent = "Current Progress: "+resultString
+    context.handleTopButtonPressed();
+}
+
+function handleBottomButtonPressed(context){
+    context.handleBottomButtonPressed();
 }
 
 function getLocalIPs(){

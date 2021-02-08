@@ -73,7 +73,6 @@ class CrackrContext{
         this.connectionInput = document.querySelector('#'+connectionInputId);
         
         this.changeState(IdleCrackrState)
-        this.refresh();
         this.initializeOperationObjects();
     }
 
@@ -87,10 +86,12 @@ class CrackrContext{
     }
 
     handleTopButtonPressed(){
+        this.refresh()
         this.state.handleTopButtonPressed();
     }
     
     handleBottomButtonPressed(){
+        this.refresh()
         this.state.handleBottomButtonPressed();
     }
     

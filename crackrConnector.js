@@ -1,4 +1,4 @@
-const {setVal} = require('./resultsAPI.js')
+const {setVal, ResultsIterator} = require('./resultsAPI.js')
 const { ipcRenderer } = require('electron')
 
 
@@ -17,18 +17,13 @@ class Connector{
         ipcRenderer.on('disconnectedOut',(event,arg)=>{
             this.context.disconnectedOut();
         })
-        ipcRenderer.on('connectedIn',(event,arg)=>{
-            
-        })
-        ipcRenderer.on('disconnectedIn',(event,arg)=>{
-            
-        })
         ipcRenderer.on('updateVal',(event,arg)=>{
             setVal(arg[0],arg[1]);
         })
         ipcRenderer.on('updateCell',(event,arg)=>{
             this.context.calculator.updateCell();
         })
+        new ResultsIterator();
     }
 
     tryToConnectToIP(targetIP){
@@ -37,10 +32,6 @@ class Connector{
 
     disconnectOutcomingConnection(){
         ipcRenderer.invoke('disconnectOut');
-    }
-
-    disconnectIncomingConnections(){
-
     }
 
     updateVals(row,val){
