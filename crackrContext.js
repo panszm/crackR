@@ -8,11 +8,9 @@ class Abstract_CrackrState {
         this.context = crackrContext
     }
 
-    refresh(topButtonText,connectionDivDisplay,bottomButtonText,connectionInputDisplay){
+    refresh(topButtonText,gearDisplay){
         this.context.topButton.textContent = topButtonText;
-        this.context.connectionDiv.style.display = connectionDivDisplay;
-        this.context.bottomButton.textContent = bottomButtonText;
-        this.context.connectionInput.style.display = connectionInputDisplay
+        document.querySelector("#gear").style.display = gearDisplay;
     }
     handleTopButtonPressed(){}
     handleBottomButtonPressed(){}
@@ -20,7 +18,7 @@ class Abstract_CrackrState {
 
 class IdleCrackrState extends Abstract_CrackrState{
     refresh(){
-        super.refresh("Start Calculations","none","","none")
+        super.refresh("Start Calculations","none")
         require('./resultsAPI.js').cleanResults();
     }
 
@@ -33,44 +31,19 @@ class IdleCrackrState extends Abstract_CrackrState{
 
 class CalculatingCrackrState extends Abstract_CrackrState{
     refresh(){
-        super.refresh("Stop Calculations","block","Connect","block")
+        super.refresh("Stop Calculations","block")
     }
 
     handleTopButtonPressed(){
         this.context.calculator.stopCalculation();
         this.context.connector.stopServer();
         this.context.changeState(IdleCrackrState);
-    }
-
-    handleBottomButtonPressed(){
-        let ip = this.context.connectionInput.textContent;
-        this.context.connector.tryToConnectToIP(ip);
-    }
-}
-
-class CalculatingAndConnectedCrackrState extends Abstract_CrackrState{
-    refresh(){
-        super.refresh("Stop Calculations and Disconnect","block","Disconnect","none")
-    }
-
-    handleTopButtonPressed(){
-        this.context.calculator.stopCalculation();
-        this.context.connector.stopServer();
-        this.context.changeState(IdleCrackrState);
-    }
-
-    handleBottomButtonPressed(){
-        this.context.connector.disconnectOutcomingConnection();
-        this.context.changeState(CalculatingCrackrState)
     }
 }
 
 class CrackrContext{
-    constructor(topButtonId,bottomButtonId,connectionDivId,connectionInputId){
+    constructor(topButtonId){
         this.topButton = document.querySelector('#'+topButtonId);
-        this.bottomButton = document.querySelector('#'+bottomButtonId);
-        this.connectionDiv = document.querySelector('#'+connectionDivId);
-        this.connectionInput = document.querySelector('#'+connectionInputId);
         
         this.changeState(IdleCrackrState)
         this.initializeOperationObjects();
@@ -90,35 +63,22 @@ class CrackrContext{
         this.state.handleTopButtonPressed();
     }
     
-    handleBottomButtonPressed(){
-        this.refresh()
-        this.state.handleBottomButtonPressed();
-    }
-    
     initializeOperationObjects(){
         this.connector = new Connector(this);
         this.calculator = new Calculator(this);
     }
 
-    connectedOut(){
-        this.changeState(CalculatingAndConnectedCrackrState)
+    connected(){
         this.calculator.goOnline()
     }
 
-    disconnectedOut(){
-        if(typeof(this.state)===CalculatingAndConnectedCrackrState){
-            this.changeState(CalculatingCrackrState)
-        }
+    disconnected(){
         this.calculator.goOffline();
     }
 
     isCellNotTaken(index){
         const result = this.connector.isCellNotTaken(index);
         return result;
-    }
-
-    updateVals(row,index){
-        this.connector.updateVals(row,index);
     }
 }
 

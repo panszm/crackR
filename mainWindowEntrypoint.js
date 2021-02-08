@@ -6,15 +6,13 @@ const nets = networkInterfaces();
 const results = {};
 
 window.onload = () => {
-    document.querySelector("#myLocalIPs").textContent = "MyLocalIPs: "+getLocalIPs();
     cleanResults()
-    let context = new CrackrContext("topButton","bottomButton","connectionDiv","connectionInput");
-    
+    let context = new CrackrContext("topButton");
+    updateProgressInfo();
     document.querySelector("#topButton").onclick = ()=>handleTopButtonPressed(context)
-    document.querySelector("#bottomButton").onclick = ()=>handleBottomButtonPressed(context)
 }
 
-function handleTopButtonPressed(context){
+function getProgressInfo(){
     let resIter = new ResultsIterator();
     let resultString = ""
     if(isSolved()){
@@ -28,24 +26,14 @@ function handleTopButtonPressed(context){
         }
         resultString = i+" cells checked, solution yet to be found";
     }
-    document.querySelector("#progressDescription").textContent = "Current Progress: "+resultString
+    return resultString;
+}
+
+function updateProgressInfo(){
+    document.querySelector("#progressDescription").textContent = "Current Progress: "+getProgressInfo();
+}
+
+function handleTopButtonPressed(context){
+    updateProgressInfo();
     context.handleTopButtonPressed();
-}
-
-function handleBottomButtonPressed(context){
-    context.handleBottomButtonPressed();
-}
-
-function getLocalIPs(){
-    for (const name of Object.keys(nets)) {
-        for (const net of nets[name]) {
-            if (net.family === 'IPv4' && !net.internal) {
-                if (!results[name]) {
-                    results[name] = [];
-                }
-                results[name].push(net.address);
-            }
-        }
-    }
-    return JSON.stringify(results);
 }

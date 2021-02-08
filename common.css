@@ -27,15 +27,6 @@ button {
     height: 6em;
     padding: 1em;
     animation: spin 6s linear infinite;
-}
-
-#connection_div{
+    margin: auto;
     display: none;
-}
-
-#connectionInput{
-    background-color: white;
-    min-width: 12em;
-    color: black;
-    margin-bottom: 0.5em;
 }
