@@ -34,8 +34,8 @@ class MainConnector{
                         this.webContents.send('updateVal',[arg[0],arg[1]]);
                         break;
                     case "exchange":
-                        socket.write("exchangeResponse "+getFirstNonMinusOne())
                         let ownCount = getFirstNonMinusOne();
+                        socket.write("exchangeResponse "+ownCount)
                         if(args[1]>ownCount){
                             for(let i=ownCount;i<args[1];i++){
                                 this.webContents.send('updateVal',[i,"-1"]);
@@ -159,7 +159,7 @@ class MainConnector{
         }
         this.outcomingConnection = new net.Socket();
         this.outcomingConnection.connect(CONNECTION_PORT,targetIP,()=>{
-            this.webContents.send('connectedOut','true');
+            this.outcomingConnection.write('exchange '+getFirstNonMinusOne())
             this.updateConnections();
         })
         this.outcomingConnection.on('data',(data)=>{
@@ -174,15 +174,16 @@ class MainConnector{
                     this.webContents.send('updateVal',[arg[0],arg[1]]);
                     break;
                 case "exchangeResponse":
+                    console.log(args)
                     let ownCount = getFirstNonMinusOne();
                     if(args[1]>ownCount){
                         for(let i=ownCount;i<args[1];i++){
                             this.webContents.send('updateVal',[i,"-1"]);
                         }
                     }
+                    this.webContents.send('connectedOut','true');
                     break;
             }
-            this.outcomingConnection.write('exchange '+getFirstNonMinusOne())
         });
         this.outcomingConnection.on('close',(err)=>{
             this.webContents.send('disconnectedOut','true');
@@ -207,17 +208,18 @@ function getValFromResults(index){
     return result[index];
 }
 
-function getFirstNonMinusOne(index){
+function getFirstNonMinusOne(){
     fs = require('fs')
     result = fs.readFileSync('./results/data.csv', 'utf8').split('\n');
     let i = 0;
     for(let line of result){
-        if(line=="-1"){
+        if(line.startsWith("-1")){
             i++;
         }else{
             break;
         }
     }
+    console.log(i)
     return i;
 }
 

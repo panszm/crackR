@@ -40,7 +40,7 @@ class Calculator{
                 if(this.state == STATES_ENUM.calculatingAndConnected){
                     let isCellOK = await this.context.isCellNotTaken(this.currentCell);
                     console.log("IsCellOK:"+isCellOK);
-                    if(isCellOK=='false'){
+                    if(!isCellOK.startsWith('true')){
                         setVal(this.currentCell,"-2");
                         this.restartCalculation();
                         return;
@@ -61,7 +61,7 @@ class Calculator{
             this.state = STATES_ENUM.calculatingAndConnected;
             this.stopFlag = true;
         }
-        setTimeout(()=>this.startCalculation(),10000)
+        setTimeout(()=>this.startCalculation(),1000)
     }
 
     goOffline(){
