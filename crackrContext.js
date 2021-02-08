@@ -1,7 +1,7 @@
 import './crackrCalculator.js'
 import Connector from './crackrConnector.js';
 import Calculator from './crackrCalculator.js';
-import { cleanResults } from './resultsAPI.js';
+const { cleanResults } = require('./resultsAPI.js');
 
 class Abstract_CrackrState {
     constructor(crackrContext){
