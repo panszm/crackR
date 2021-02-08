@@ -115,8 +115,8 @@ class CrackrContext{
         this.connector.exchangeResults();
     }
 
-    async isCellNotTaken(index){
-        const result = await this.connector.isCellNotTaken(index);
+    isCellNotTaken(index){
+        const result = this.connector.isCellNotTaken(index);
         return result;
     }
 }

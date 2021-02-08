@@ -49,8 +49,8 @@ class Connector{
 
     }
 
-    async isCellNotTaken(index){
-        const result = await ipcRenderer.invoke('isCellNotTaken',index);
+    isCellNotTaken(index){
+        const result = ipcRenderer.invoke('isCellNotTaken',index);
         return result;
     }
 

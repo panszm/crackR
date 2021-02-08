@@ -78,13 +78,13 @@ class MainConnector{
         return true;
     }
 
-    async respondIfCellAvailable(index){
+    respondIfCellAvailable(index){
         let value = getValFromResults(index);
         if(value == "-1" || value=="-2"){
             return false;
         }
         if(this.outcomingConnection){
-            const result = await this.askIfCellAvailable(index);
+            const result = this.askIfCellAvailable(index);
             return result;
         }
         return true;
