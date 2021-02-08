@@ -37,7 +37,7 @@ class MainConnector{
                         let ownCount = getFirstNonMinusOne();
                         socket.write("exchangeResponse "+ownCount)
                         if(args[1]>ownCount){
-                            for(let i=ownCount;i<args[1];i++){
+                            for(let i=0;i<args[1];i++){
                                 this.webContents.send('updateVal',[i,"-1"]);
                             }
                         }
@@ -174,10 +174,9 @@ class MainConnector{
                     this.webContents.send('updateVal',[arg[0],arg[1]]);
                     break;
                 case "exchangeResponse":
-                    console.log(args)
                     let ownCount = getFirstNonMinusOne();
                     if(args[1]>ownCount){
-                        for(let i=ownCount;i<args[1];i++){
+                        for(let i=0;i<args[1];i++){
                             this.webContents.send('updateVal',[i,"-1"]);
                         }
                     }
@@ -219,7 +218,6 @@ function getFirstNonMinusOne(){
             break;
         }
     }
-    console.log(i)
     return i;
 }
 
