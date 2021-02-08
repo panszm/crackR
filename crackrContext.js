@@ -111,13 +111,13 @@ class CrackrContext{
         this.calculator.goOffline();
     }
 
-    exchangeResults(){
-        this.connector.exchangeResults();
-    }
-
     isCellNotTaken(index){
         const result = this.connector.isCellNotTaken(index);
         return result;
+    }
+
+    updateVals(row,index){
+        this.connector.updateVals(row,index);
     }
 }
 

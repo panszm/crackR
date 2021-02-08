@@ -30,6 +30,18 @@ class MainConnector{
                         let response = this.respondIfCellAvailable(args[1])
                         socket.write("cellAvailabilityResponse "+response);
                         break;
+                    case "updateVal":
+                        this.webContents.send('updateVal',[arg[0],arg[1]]);
+                        break;
+                    case "exchange":
+                        socket.write("exchangeResponse "+getFirstNonMinusOne())
+                        let ownCount = getFirstNonMinusOne();
+                        if(args[1]>ownCount){
+                            for(let i=ownCount;i<args[1];i++){
+                                this.webContents.send('updateVal',[i,"-1"]);
+                            }
+                        }
+                        break;
                 }
             })
 
@@ -56,6 +68,9 @@ class MainConnector{
             const result = await this.askIfCellAvailable(arg);
             return result;
         })
+        ipcMain.handle('updateVals',(event,arg)=>{
+            this.updateValues(arg[0],arg[1]);
+        })
     }
 
     sleep(ms) {
@@ -77,8 +92,6 @@ class MainConnector{
     respondIfCellAvailable(index){
         let value = getValFromResults(index);
         value = value.trim();
-        console.log("VAL:",value)
-        console.log("INDEX:",index)
         if(value<0){
             return false;
         }
@@ -131,6 +144,15 @@ class MainConnector{
         this.updateConnections();
     }
 
+    updateValues(row,value){
+        for(let conn of this.incomingConnections){
+            conn.write("updateVal "+row+" "+value);
+        }
+        if(this.outcomingConnection){
+            this.outcomingConnection.write("updateVal "+row+" "+value);
+        }
+    }
+
     connectTo(targetIP){
         if(this.outcomingConnection!=null){
             this.outcomingConnection.destroy();
@@ -145,11 +167,22 @@ class MainConnector{
             let args = data.split(" ");
             switch(args[0]){
                 case "cellAvailabilityResponse":
-                    console.log(args)
                     this.lastResponse = args[1];
                     this.waitingForPermission = false;
                     break;
+                case "updateVal":
+                    this.webContents.send('updateVal',[arg[0],arg[1]]);
+                    break;
+                case "exchangeResponse":
+                    let ownCount = getFirstNonMinusOne();
+                    if(args[1]>ownCount){
+                        for(let i=ownCount;i<args[1];i++){
+                            this.webContents.send('updateVal',[i,"-1"]);
+                        }
+                    }
+                    break;
             }
+            this.outcomingConnection.write('exchange '+getFirstNonMinusOne())
         });
         this.outcomingConnection.on('close',(err)=>{
             this.webContents.send('disconnectedOut','true');
@@ -172,6 +205,20 @@ function getValFromResults(index){
         return "";
     }
     return result[index];
+}
+
+function getFirstNonMinusOne(index){
+    fs = require('fs')
+    result = fs.readFileSync('./results/data.csv', 'utf8').split('\n');
+    let i = 0;
+    for(let line of result){
+        if(line=="-1"){
+            i++;
+        }else{
+            break;
+        }
+    }
+    return i;
 }
 
 module.exports = {MainConnector};

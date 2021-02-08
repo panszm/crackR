@@ -1,4 +1,4 @@
-import * as resultsAPI from './resultsAPI.js'
+const {setVal} = require('./resultsAPI.js')
 const { ipcRenderer } = require('electron')
 
 
@@ -23,6 +23,9 @@ class Connector{
         ipcRenderer.on('disconnectedIn',(event,arg)=>{
             
         })
+        ipcRenderer.on('updateVal',(event,arg)=>{
+            setVal(arg[0],arg[1]);
+        })
     }
 
     tryToConnectToIP(targetIP){
@@ -37,16 +40,16 @@ class Connector{
 
     }
 
+    updateVals(row,val){
+        ipcRenderer.invoke('updateVals', [row,val])
+    }
+
     startServer(){
         ipcRenderer.invoke('startServer');
     }
 
     stopServer(){
         ipcRenderer.invoke('stopServer');
-    }
-
-    exchangeResults(){
-
     }
 
     isCellNotTaken(index){

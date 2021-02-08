@@ -40,8 +40,9 @@ class Calculator{
                 if(this.state == STATES_ENUM.calculatingAndConnected){
                     let isCellOK = await this.context.isCellNotTaken(this.currentCell);
                     isCellOK = isCellOK.trim("\n")
-                    console.log("IsCellOK:"+isCellOK+":");
-                    if(!isCellOK){
+                    console.log("IsCellOK:"+isCellOK);
+                    if(isCellOK=='false'){
+                        console.log("en")
                         setVal(this.currentCell,"-2");
                         this.restartCalculation();
                         return;
@@ -61,7 +62,6 @@ class Calculator{
         if(this.state==STATES_ENUM.calculating){
             this.state = STATES_ENUM.calculatingAndConnected;
             this.stopFlag = true;
-            this.context.exchangeResults();
         }
         setTimeout(()=>this.startCalculation(),1000)
     }
@@ -85,6 +85,7 @@ class Calculator{
     checkNextIteration(){
         if(checkHash(BigInt(CELL_SIZE*this.currentCell+this.currentIteration))){
             setVal(this.currentCell,BigInt(CELL_SIZE*this.currentCell+this.currentIteration));
+            this.context.updateVals(this.currentCell,BigInt(CELL_SIZE*this.currentCell+this.currentIteration))
             this.state = STATES_ENUM.solutionFound;
             alert("SOLUTION FOUND");
         }else{
@@ -95,6 +96,7 @@ class Calculator{
 
     finalizeCell(){
         setVal(this.currentCell,"-1");
+        this.context.updateVals(this.currentCell,"-1")
         if(this.state==STATES_ENUM.calculating){
             this.restartCalculation();
         }
