@@ -30,10 +30,6 @@ class MainConnector{
                         let response = this.respondIfCellAvailable(args[1])
                         socket.write("cellAvailabilityResponse "+response);
                         break;
-                    case "cellAvailabilityResponse":
-                        this.lastResponse = args[1];
-                        this.waitingForPermission = false;
-                        break;
                 }
             })
 
@@ -83,7 +79,7 @@ class MainConnector{
         if(value == "-1" || value=="-2"){
             return false;
         }
-        if(this.outcomingConnection){
+        if(this.outcomingConnection.readyState==1){
             const result = this.askIfCellAvailable(index);
             return result;
         }
@@ -143,12 +139,9 @@ class MainConnector{
             data = data.toString("utf-8")
             let args = data.split(" ");
             switch(args[0]){
-                case "cellAvailability":
-                    this.outcomingConnection.write("cellAvailabilityResponse "+this.respondIfCellAvailable(args[1]));
-                    break;
                 case "cellAvailabilityResponse":
                     console.log(args)
-                    this.lastResponse = args[1];
+                    this.lastResponse = args;
                     this.waitingForPermission = false;
                     break;
             }
