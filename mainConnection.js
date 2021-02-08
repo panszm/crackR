@@ -79,9 +79,11 @@ class MainConnector{
         if(value == "-1" || value=="-2"){
             return false;
         }
-        if(this.outcomingConnection.readyState==1){
-            const result = this.askIfCellAvailable(index);
-            return result;
+        if(this.outcomingConnection!=null){
+            if(this.outcomingConnection.readyState==1){
+                const result = this.askIfCellAvailable(index);
+                return result;
+            }
         }
         return true;
     }
