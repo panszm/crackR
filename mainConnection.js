@@ -22,12 +22,12 @@ class MainConnector{
                 this.handleIncomingDisconnection(socket);
             });
 
-            socket.on('data',(data)=>{
+            socket.on('data',async(data)=>{
                 data = data.toString("utf-8")
                 let args = data.split(" ");
                 switch(args[0]){
                     case "cellAvailability":
-                        let response = this.respondIfCellAvailable(args[1])
+                        let response = await this.respondIfCellAvailable(args[1])
                         socket.write("cellAvailabilityResponse "+response);
                         break;
                     case "cellAvailabilityResponse":
@@ -78,13 +78,14 @@ class MainConnector{
         return true;
     }
 
-    respondIfCellAvailable(index){
+    async respondIfCellAvailable(index){
         let value = getValFromResults(index);
         if(value == "-1" || value=="-2"){
             return false;
         }
         if(this.outcomingConnection){
-            return this.askIfCellAvailable(index);
+            const result = await this.askIfCellAvailable(index);
+            return result;
         }
         return true;
     }
