@@ -22,12 +22,12 @@ class MainConnector{
                 this.handleIncomingDisconnection(socket);
             });
 
-            socket.on('data',async(data)=>{
+            socket.on('data',(data)=>{
                 data = data.toString("utf-8")
                 let args = data.split(" ");
                 switch(args[0]){
                     case "cellAvailability":
-                        let response = await this.respondIfCellAvailable(args[1])
+                        let response = this.respondIfCellAvailable(args[1])
                         socket.write("cellAvailabilityResponse "+response);
                         break;
                     case "cellAvailabilityResponse":
