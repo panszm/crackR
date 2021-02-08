@@ -77,10 +77,11 @@ class MainConnector{
 
     handleMessage(message,rinfo){
         if(rinfo.address!=this.localIP){
+            message = ""+message;
             let args = message.split(" ");
             switch(args[0]){
                 case "Hello":
-                    if(arg[1]>getFirstNonMinusOne()){
+                    if(args[1]>getFirstNonMinusOne()){
                         for(let i=0;i<args[1];i++){
                             this.webContents.send('updateVal',[i,"-1"]);
                         }

@@ -12,6 +12,9 @@ class ResultsIterator{
     }
 
     getCurrentRowIndex(){
+        if(this.currentIterator>=this.indexes.length){
+            return this.indexes.length-1;
+        }
         return this.indexes[this.currentIterator];
     }
 
@@ -31,9 +34,10 @@ class ResultsIterator{
     }
 
     next(){
-        this.currentIterator++;
         if(this.hasNext()){
-            return this.elements[this.indexes[this.currentIterator]];
+            let result = this.elements[this.indexes[this.currentIterator]];
+            this.currentIterator++;
+            return result;
         }
         return false;
     }
