@@ -10,6 +10,8 @@ class MainConnector{
     constructor(ipcMain, webContents){
         this.ipcMain = ipcMain
         this.webContents = webContents;
+
+        this.localIP = getLocalIP();
     
         this.waitingForPermission = false;
         this.lastResponse = null;
@@ -31,13 +33,11 @@ class MainConnector{
     }
 
     async askIfCellAvailable(index){
-        if(this.outcomingConnection){
-            this.waitingForPermission = true;
-            this.outcomingConnection.write("cellAvailability "+index);
-            for(let i = 0;i<50;i++){
-                await this.sleep(200)
-                if(!this.waitingForPermission){return this.lastResponse;}
-            }
+        this.waitingForPermission = true;
+        this.client.send("cellAvailability "+index);
+        for(let i = 0;i<50;i++){
+            await this.sleep(200)
+            if(!this.waitingForPermission){return this.lastResponse;}
         }
         return true;
     }
@@ -60,15 +60,33 @@ class MainConnector{
         });
         this.client.on('message', (message, rinfo) => {
             console.log('Message from: ' + rinfo.address + ':' + rinfo.port +' - ' + message);
+            this.handleMessage(message,rinfo);
         });
         this.client.bind(CONNECTION_PORT);
 
-        var message = "Some bytes";
-        this.client.send(message, 0, message.length, CONNECTION_PORT, "192.168.15.255");
+        this.sendMessage("Hello "+getFirstNonMinusOne())
     }
 
     stopServer(){
         this.client.close();
+    }
+
+    sendMessage(message){
+        this.client.send(message, 0, message.length, CONNECTION_PORT, "192.168.15.255");
+    }
+
+    handleMessage(message,rinfo){
+        if(rinfo.address!=this.localIP){
+            let args = message.split(" ");
+            switch(args[0]){
+                case "Hello":
+                    if(arg[1]>getFirstNonMinusOne()){
+                        for(let i=0;i<args[1];i++){
+                            this.webContents.send('updateVal',[i,"-1"]);
+                        }
+                    }
+            }
+        }
     }
 }
 
@@ -93,6 +111,21 @@ function getFirstNonMinusOne(){
         }
     }
     return i;
+}
+
+function getLocalIP(){
+    const { networkInterfaces } = require('os');
+    const nets = networkInterfaces();
+    for (const name of Object.keys(nets)) {
+        for (const net of nets[name]) {
+            if (net.family === 'IPv4' && !net.internal) {
+                if(net.address.startsWith("192.168.15.")){
+                    return net.address;
+                }
+            }
+        }
+    }
+    return "";
 }
 
 module.exports = {MainConnector};
