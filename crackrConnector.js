@@ -26,6 +26,9 @@ class Connector{
         ipcRenderer.on('updateVal',(event,arg)=>{
             setVal(arg[0],arg[1]);
         })
+        ipcRenderer.on('updateCell',(event,arg)=>{
+            this.context.calculator.updateCell();
+        })
     }
 
     tryToConnectToIP(targetIP){
