@@ -39,7 +39,7 @@ class Calculator{
                 this.updateCell();
                 if(this.state == STATES_ENUM.calculatingAndConnected){
                     let isCellOK = await this.context.isCellNotTaken(this.currentCell);
-                    console.log(isCellOK);
+                    console.log("IsCellOK:",isCellOK);
                     if(!isCellOK){
                         setVal(this.currentCell,"-2");
                         this.restartCalculation();
@@ -53,7 +53,7 @@ class Calculator{
                 alert("SOLUTION ALREADY FOUND");
             }
         }
-        func()
+        func();
     }
 
     goOnline(){

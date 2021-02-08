@@ -27,8 +27,8 @@ class MainConnector{
                 let args = data.split(" ");
                 switch(args[0]){
                     case "cellAvailability":
-                        console.log(this.respondIfCellAvailable(args[1]))
-                        socket.write("cellAvailabilityResponse "+this.respondIfCellAvailable(args[1]));
+                        let response = this.respondIfCellAvailable(args[1])
+                        socket.write("cellAvailabilityResponse "+response);
                         break;
                     case "cellAvailabilityResponse":
                         this.lastResponse = args[1];
@@ -72,7 +72,6 @@ class MainConnector{
             this.outcomingConnection.write("cellAvailability "+index);
             for(let i = 0;i<50;i++){
                 await this.sleep(200)
-                console.log(i);
                 if(!this.waitingForPermission){return this.lastResponse;}
             }
         }
@@ -80,7 +79,7 @@ class MainConnector{
     }
 
     respondIfCellAvailable(index){
-        let value = getValFromResults(index)
+        let value = getValFromResults(index);
         if(value == "-1" || value=="-2"){
             return false;
         }
@@ -147,6 +146,7 @@ class MainConnector{
                     this.outcomingConnection.write("cellAvailabilityResponse "+this.respondIfCellAvailable(args[1]));
                     break;
                 case "cellAvailabilityResponse":
+                    console.log(args)
                     this.lastResponse = args[1];
                     this.waitingForPermission = false;
                     break;
