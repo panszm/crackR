@@ -1,4 +1,4 @@
-const {setVal, getFirstUnresolved, isSolved} = require('./resultsAPI.js');
+const {setVal, getFirstUnresolved, isSolved, cleanResults} = require('./resultsAPI.js');
 
 // //a
 // const HASH_BEING_CRACKED = "0cc175b9c0f1b6a831c399e269772661"
@@ -45,6 +45,7 @@ class Calculator{
                 }
                 this.stopFlag = false;
                 this.currentTimeStamp = Date.now();
+                cleanResults();
                 setVal(this.currentCell,"-2");
                 this.context.updateTimestamp(this.currentTimeStamp);
                 executeAsync(()=>this.checkConditionForNextIteration(this));
