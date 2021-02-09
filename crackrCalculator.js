@@ -45,7 +45,6 @@ class Calculator{
                 }
                 this.stopFlag = false;
                 this.currentTimeStamp = Date.now();
-                cleanResults();
                 setVal(this.currentCell,"-2");
                 this.context.updateTimestamp(this.currentTimeStamp);
                 executeAsync(()=>this.checkConditionForNextIteration(this));
