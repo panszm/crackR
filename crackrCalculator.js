@@ -84,6 +84,7 @@ class Calculator{
     }
 
     finalizeCell(){
+        cleanResults();
         setVal(this.currentCell,"-1");
         this.context.updateVals(this.currentCell,"-1")
         if(this.state==STATES_ENUM.calculating){
