@@ -116,9 +116,18 @@ function cleanResults(){
     }
 }
 
+function cleanOthers(){
+    let resIter = new ResultsIterator();
+    while(resIter.hasNext()){
+        if(resIter.next()==-3){
+            setVal(resIter.getCurrentRowIndex(),"")
+        }
+    }
+}
+
 function getFirstUnresolved(){
     let resIter = new ResultsIterator();
     return resIter.getFirstEmpty();
 }
 
-module.exports = {ResultsIterator,setVal,getVal,isSolved,cleanResults,getFirstUnresolved};
+module.exports = {ResultsIterator,setVal,getVal,isSolved,cleanResults,cleanOthers,getFirstUnresolved};

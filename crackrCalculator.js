@@ -1,4 +1,4 @@
-const {setVal, getFirstUnresolved, isSolved, cleanResults} = require('./resultsAPI.js');
+const {setVal, getFirstUnresolved, isSolved, cleanOthers} = require('./resultsAPI.js');
 
 // //a
 // const HASH_BEING_CRACKED = "0cc175b9c0f1b6a831c399e269772661"
@@ -84,7 +84,7 @@ class Calculator{
     }
 
     finalizeCell(){
-        cleanResults();
+        cleanOthers();
         setVal(this.currentCell,"-1");
         this.context.updateVals(this.currentCell,"-1")
         if(this.state==STATES_ENUM.calculating){
